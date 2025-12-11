@@ -1,0 +1,394 @@
+.interactive-carousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+  .carousel-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    touch-action: pan-y;
+    user-select: none;
+  }
+
+  .carousel-track {
+    display: flex;
+    width: 100%;
+    will-change: transform;
+  }
+
+  .carousel-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    padding: 20px;
+  }
+
+  .productos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    justify-items: center;
+  }
+
+  .carousel-item {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .producto-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+
+      .producto-overlay {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .producto-img {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .producto-imagen {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    background: linear-gradient(45deg, #f1f3f4, #e8eaed);
+  }
+
+  .producto-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .producto-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 193, 7, 0.9) 0%,
+      rgba(255, 152, 0, 0.9) 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .btn-vista-rapida {
+    background: white;
+    color: #ff6b35;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      transform: translateY(0) scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .producto-overlay:hover .btn-vista-rapida {
+    transform: translateY(0);
+  }
+
+  .producto-info {
+    padding: 20px;
+  }
+
+  .producto-nombre {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+  }
+
+  .producto-precio {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ff6b35;
+    margin: 0 0 12px 0;
+  }
+
+  .producto-rating {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 16px;
+
+    .star {
+      font-size: 16px;
+      opacity: 0.3;
+      transition: opacity 0.2s ease;
+
+      &.filled {
+        opacity: 1;
+      }
+    }
+  }
+
+  .btn-ver-detalles {
+    width: 100%;
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #2c3e50;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      transition: left 0.5s ease;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+
+      &::before {
+        left: 100%;
+      }
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  // Controles de navegación
+  .carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    &:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: translateY(-50%) scale(1);
+    }
+
+    &.carousel-arrow-prev {
+      left: 20px;
+    }
+
+    &.carousel-arrow-next {
+      right: 20px;
+    }
+  }
+
+  // Indicadores de puntos
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    margin-top: 10px;
+  }
+
+  .carousel-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    &:hover {
+      background: rgba(255, 193, 7, 0.6);
+      transform: scale(1.2);
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+      transform: scale(1.3);
+      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+    }
+  }
+
+  // Control de play/pause
+  .carousel-play-pause {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.9);
+      transform: scale(1.1);
+    }
+  }
+
+  // Estado vacío
+  .carousel-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #6c757d;
+    font-size: 18px;
+    background: #f8f9fa;
+    border-radius: 16px;
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    .carousel-slide {
+      padding: 15px;
+    }
+
+    .productos-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .carousel-arrow {
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+
+      &.carousel-arrow-prev {
+        left: 10px;
+      }
+
+      &.carousel-arrow-next {
+        right: 10px;
+      }
+    }
+
+    .producto-imagen {
+      height: 200px;
+    }
+
+    .carousel-play-pause {
+      top: 10px;
+      right: 10px;
+      width: 35px;
+      height: 35px;
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .carousel-slide {
+      padding: 10px;
+    }
+
+    .producto-card {
+      border-radius: 12px;
+    }
+
+    .producto-info {
+      padding: 15px;
+    }
+
+    .producto-nombre {
+      font-size: 16px;
+    }
+
+    .producto-precio {
+      font-size: 18px;
+    }
+  }
+}
+
+// Animaciones adicionales
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.interactive-carousel .carousel-item {
+  animation: slideIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.interactive-carousel .carousel-dot.active {
+  animation: pulse 2s infinite;
+}

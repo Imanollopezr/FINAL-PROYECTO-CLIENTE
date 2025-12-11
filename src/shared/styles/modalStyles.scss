@@ -1,0 +1,568 @@
+// Estilos base comunes para modales de detalles
+// Diseño uniforme de dos columnas con cajones alineados
+
+:root {
+  --modal-bg-primary: #ffffff;
+  --modal-bg-secondary: #f8fafc;
+  --modal-border: #e2e8f0;
+  --modal-shadow: rgba(0, 0, 0, 0.1);
+  --modal-text-primary: #1f2937;
+  --modal-text-secondary: #6b7280;
+  --modal-accent: #f4d03f;
+  --modal-accent-hover: #f39c12;
+  --modal-success: #10b981;
+  --modal-danger: #ef4444;
+}
+
+body.dark-mode {
+  --modal-bg-primary: #1f2937;
+  --modal-bg-secondary: #111827;
+  --modal-border: #374151;
+  --modal-shadow: rgba(0, 0, 0, 0.3);
+  --modal-text-primary: #f3f4f6;
+  --modal-text-secondary: #9ca3af;
+}
+
+// Overlay y contenedor del modal (alineados al estilo de Productos)
+.dialog-overlay {
+  background: rgba(0, 0, 0, 0.75);
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-content {
+  background: var(--modal-bg-primary);
+  border-radius: 1.2rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 94vw;
+  max-width: 980px;
+  max-height: 86vh;
+  overflow: auto;
+  padding: 2rem;
+  color: var(--modal-text-primary);
+  z-index: 9999;
+
+  &.dialog-detalles {
+    max-width: 980px;
+    width: 94%;
+    max-height: 86vh;
+    overflow: auto;
+  }
+}
+
+.dialog-title {
+  position: sticky;
+  top: 0;
+  background: var(--modal-bg-primary);
+  z-index: 2;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #000;
+  padding: 0.5rem 0 0.75rem 0;
+  border-bottom: 1px solid var(--modal-border);
+}
+
+.dialog-description {
+  font-size: 0.9rem;
+  color: var(--modal-text-secondary);
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+// Texto introductorio para formularios de agregar (uniforme y negro)
+.form-intro {
+  color: #000;
+  font-weight: 600;
+  margin: 0.25rem 0 0.75rem;
+  text-align: center;
+}
+
+// Contenedor principal del modal
+.modal-detalles-base {
+  background: var(--modal-bg-primary);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  max-width: 800px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--modal-border);
+}
+
+// Botón de cierre unificado para todos los modales
+.dialog-close-unified {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #e2e8f0;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10001;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+  &:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border-color: #dc2626;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// Título principal del modal
+.modal-titulo-base {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid transparent;
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #FFD166 0%, #F7931E 100%);
+    border-radius: 2px;
+  }
+}
+
+// Sección de detalles
+.seccion-detalles-base {
+  width: 100%;
+  margin: 0 0 1.5rem 0;
+  padding: 1.5rem;
+  background: var(--modal-bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--modal-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #FFD166 0%, #F7931E 100%);
+  }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border-color: rgba(255, 209, 102, 0.3);
+  }
+}
+
+// Título de sección
+.titulo-seccion-base {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--modal-text-primary);
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--modal-border);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: linear-gradient(135deg, #FFD166 0%, #F7931E 100%);
+    border-radius: 2px;
+  }
+}
+
+// Contenedor de dos columnas
+.formulario-dos-columnas-base {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  width: 100%;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+// Cajón individual de información
+.detalle-grupo-base {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--modal-bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--modal-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(135deg, #FFD166 0%, #F7931E 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  &:hover {
+    border-color: rgba(255, 209, 102, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+    
+    &::before {
+      opacity: 1;
+    }
+  }
+  
+  label {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: var(--modal-text-secondary);
+    font-size: 0.8rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    opacity: 0.8;
+  }
+  
+  span {
+    font-family: 'Poppins', sans-serif;
+    color: var(--modal-text-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    word-wrap: break-word;
+    line-height: 1.5;
+    
+    &.estado-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      
+      &.activo {
+         background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+         color: #166534;
+         border: 1px solid #bbf7d0;
+       }
+       
+       &.inactivo {
+         background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+         color: #dc2626;
+         border: 1px solid #fecaca;
+       }
+    }
+  }
+}
+
+// Acciones del modal
+.modal-acciones-base {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--modal-border);
+  
+  .btn-cerrar {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid var(--modal-border);
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: #e5e7eb;
+      border-color: #d1d5db;
+    }
+  }
+}
+
+// Overlay del modal
+.modal-overlay-base {
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  inset: 0;
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(4px);
+}
+
+// Animaciones
+@keyframes overlayShow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+// Aplicar animación al contenido del modal
+.modal-detalles-base {
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+// Estilos para badges de estado
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  &.activo {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+  
+  &.inactivo {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #dc2626;
+    border: 1px solid #fecaca;
+  }
+}
+
+// Responsividad
+@media (max-width: 768px) {
+  .modal-detalles-base {
+    width: 95%;
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .formulario-dos-columnas-base {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .modal-titulo-base {
+    font-size: 1.25rem;
+  }
+
+  .titulo-seccion-base {
+    font-size: 1rem;
+  }
+
+  .detalle-grupo-base {
+    padding: 0.75rem;
+  }
+}
+
+// Estilos comunes de formularios en una sola columna
+.formulario-vertical,
+.formulario-unico,
+.dialog-form,
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+// Grupo de campo estándar (labels arriba, inputs full width)
+.grupo-campo,
+.form-group,
+.campo-moderno {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.grupo-campo label,
+.form-group label,
+.campo-moderno label {
+  font-weight: 600;
+  color: var(--modal-text-primary);
+  font-size: 0.95rem;
+}
+
+// Inputs consistentes
+.grupo-campo input,
+.grupo-campo select,
+.grupo-campo textarea,
+.form-group input,
+.form-group select,
+.form-group textarea,
+.campo-moderno .input-moderno,
+.campo-moderno input,
+.campo-moderno select,
+.campo-moderno textarea {
+  width: 100%;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--modal-border);
+  border-radius: 0.5rem;
+  background: var(--modal-bg-primary);
+  color: var(--modal-text-primary);
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.grupo-campo input:focus,
+.grupo-campo select:focus,
+.grupo-campo textarea:focus,
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+.campo-moderno .input-moderno:focus,
+.campo-moderno input:focus,
+.campo-moderno select:focus,
+.campo-moderno textarea:focus {
+  outline: none;
+  border-color: #6b7280;
+  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.12);
+}
+
+// Textarea coherente
+.grupo-campo textarea,
+.form-group textarea,
+.campo-moderno textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+// Acciones centradas en el modal
+.dialog-actions-centrado,
+.botones-formulario,
+.modal-acciones-base {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  position: static;
+  background: var(--modal-bg-primary);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+  border-top: 2px solid var(--modal-border);
+  box-shadow: none;
+  z-index: 2;
+}
+
+.dialog-actions-centrado .btn-confirmar,
+.modal-acciones-base .btn-confirmar {
+  background: linear-gradient(135deg, #ffc600, #ff8c00);
+  color: #000;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(255, 198, 0, 0.3);
+  min-width: 140px;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(255, 198, 0, 0.4);
+  }
+}
+
+@media (max-width: 480px) {
+  .dialog-content {
+    width: 96vw;
+    padding: 0.75rem;
+  }
+}
+
+// Responsivo: mantener una sola columna y espaciado
+@media (max-width: 768px) {
+  .formulario-vertical,
+  .formulario-unico,
+  .dialog-form,
+  .modal-body {
+    gap: 0.55rem;
+  }
+  .grupo-campo label,
+  .form-group label,
+  .campo-moderno label {
+    font-size: 0.9rem;
+  }
+}

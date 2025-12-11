@@ -1,0 +1,37 @@
+/* Estilos contrastantes por rol */
+body.role-admin, .page-wrapper.role-admin {
+  --role-accent: #d97706; /* naranja tostado */
+  --role-bg: #fff7ed;
+}
+body.role-asistente, .page-wrapper.role-asistente {
+  --role-accent: #2563eb; /* azul vivo */
+  --role-bg: #eff6ff;
+}
+body.role-usuario, .page-wrapper.role-usuario {
+  --role-accent: #16a34a; /* verde */
+  --role-bg: #f0fdf4;
+}
+body.role-cliente, .page-wrapper.role-cliente {
+  --role-accent: #db2777; /* fucsia */
+  --role-bg: #fdf2f8;
+}
+body.role-visitante, .page-wrapper.role-visitante {
+  --role-accent: #6b7280; /* gris */
+  --role-bg: #f9fafb;
+}
+
+/* Aplicación en layout básicos para contraste */
+.page-wrapper {
+  background-color: var(--role-bg);
+}
+.navbar, .menu-link.active, .btn-primary, .pill-accent {
+  border-color: var(--role-accent);
+  background-image: linear-gradient(135deg, var(--role-accent), color-mix(in oklab, var(--role-accent) 60%, white 40%));
+}
+.badge-role {
+  background-color: var(--role-accent);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}

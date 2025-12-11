@@ -1,0 +1,96 @@
+/* Layout general */
+.layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  /* Navbar arriba */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #ffffff;
+    color: #111827;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 1000;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Logo */
+  .logo {
+    font-weight: bold;
+    font-size: 18px;
+    color: #facc15; /* Amarillo PETLOVE */
+  }
+  
+  /* Contenedor del sidebar y contenido */
+  .sidebar {
+    position: fixed;
+    top: 60px; /* comienza debajo del navbar */
+    left: 0;
+    width: 220px;
+    height: calc(100% - 60px);
+    background: #f8f9fa;
+    border-right: 1px solid #ddd;
+    padding: 20px 10px;
+    overflow-y: auto;
+  }
+  
+  /* Sidebar items */
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .sidebar li {
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .sidebar li:hover {
+    background: #e2e8f0;
+  }
+  
+  /* Contenido principal */
+  .content {
+    margin-top: 60px; /* espacio del navbar */
+    margin-left: 220px; /* espacio del sidebar */
+    padding: 20px;
+    flex: 1;
+    background: #fff;
+  }
+
+  /* Animación suave para colapso/expansión */
+  .content-wrapper {
+    transition: margin-left 0.3s ease;
+  }
+  
+  /* Email */
+  .navbar-email {
+    font-size: 14px;
+    margin-right: 10px;
+    color: #111827;
+  }
+  
+  /* Botón cerrar sesión */
+  .logout-btn {
+    background: #facc15;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .logout-btn:hover {
+    background: #eab308;
+  }
+  

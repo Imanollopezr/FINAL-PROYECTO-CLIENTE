@@ -1,0 +1,840 @@
+@import '../../shared/styles/modalStyles.scss';
+@import '../shared/styles/inactiveActions.scss';
+
+:root {
+  --bg-primary: #f9fafb;
+  --text-primary: #111827;
+  --border: #d1d5db;
+  --input-bg: #fff;
+  --header-bg: #eeeeeb;
+  --header-text: #000000;
+}
+
+body.dark-mode {
+  --bg-primary: #1f2937;
+  --text-primary: #f3f4f6;
+  --border: #374151;
+  --input-bg: #111827;
+  --header-bg: #374151;
+  --header-text: #f3f4f6;
+}
+
+// Contenedor principal con fondo de imagen
+.productos-page-container {
+  min-height: 100vh;
+  padding: 20px;
+  background: var(--bg-primary);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  
+  // Para modo oscuro - ajustamos el brillo de la imagen
+  body.dark-mode & {
+    filter: brightness(0.8);
+  }
+}
+
+// Animaciones para modales
+
+
+// Estilos para la modal
+.dialog-overlay {
+  background: rgba(0, 0, 0, 0.75);
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  backdrop-filter: blur(2px);
+  pointer-events: all;
+}
+
+.dialog-content {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 1.2rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  max-width: 800px;
+  max-height: 80vh;
+  padding: 20px;
+  z-index: 9999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
+  box-sizing: border-box;
+  contain: layout paint;
+
+  &.dialog-detalles {
+    max-width: 800px;
+    width: 90%;
+  }
+}
+
+// Descripción accesible del diálogo
+.dialog-description {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: -0.75rem;
+  margin-bottom: 1rem;
+}
+
+.dialog-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.dialog-close-unified {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.dialog-title {
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 2;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #000;
+  padding: 0.5rem 0 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.dialog-detalles {
+  .detalles-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .detalle-grupo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem;
+    background-color: var(--input-bg);
+    border-radius: 0.4rem;
+    border: 2px solid #e5e7eb;
+  
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    label {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+      font-size: 0.8rem;
+    }
+
+      span {
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 0.9rem;
+        
+        &.estado-badge {
+          display: inline-block;
+          padding: 0.3rem 0.7rem;
+          border-radius: 0.8rem;
+          font-size: 0.75rem;
+          font-weight: 600;
+          
+        &.activo {
+          background-color: #dcfce7;
+          color: #065f46;
+          border: 1px solid #bbf7d0;
+        }
+          &.inactivo {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            
+            &:hover {
+              background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+.dialog-detalles {
+  max-width: 450px;
+  width: 85%;
+  
+  .detalles-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0;
+    
+    .detalle-grupo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem;
+      background-color: var(--input-bg);
+      border-radius: 0.4rem;
+      border: 2px solid #e5e7eb;
+      border-left: 4px solid var(--primary-color);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+      label {
+        font-weight: 600;
+        color: var(--text-color);
+        margin: 0;
+        font-size: 0.9rem;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+
+        label {
+          font-weight: 600;
+          color: var(--text-color);
+          font-size: 0.9rem;
+
+          .requerido {
+            color: #dc3545;
+            margin-left: 2px;
+          }
+        }
+
+        .input-moderno,
+        select,
+        textarea {
+          padding: 0.6rem 0.9rem;
+          border: 2px solid #e9ecef;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          transition: all 0.3s ease;
+          background: white;
+          width: 100%;
+
+          &:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 198, 0, 0.1);
+          }
+
+          &::placeholder {
+            color: #6c757d;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Botones de cerrar duplicados removidos - usar la definición anterior
+
+.btn-cerrar {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(107, 114, 128, 0.4);
+  }
+}
+
+// Acciones de diálogo
+.dialog-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+
+  .btn-confirmar {
+    background: linear-gradient(135deg, #ffc600, #ff8c00);
+    color: #000;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(255, 198, 0, 0.3);
+    min-width: 120px;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(255, 198, 0, 0.4);
+    }
+  }
+
+  .btn-cancelar {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+    min-width: 120px;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(107, 114, 128, 0.4);
+    }
+  }
+}
+
+// Botones de diálogo
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+// Texto de error
+.error-text {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+// Alineación perfecta del encabezado Acciones
+thead th:last-child {
+  text-align: center;
+  width: 160px;
+  min-width: 160px;
+}
+
+// Acciones del diálogo centradas y pegajosas al fondo
+.dialog-actions-centrado {
+  position: static;
+  background: #ffffff;
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+  border-top: 2px solid var(--border);
+  box-shadow: none;
+  z-index: 2;
+}
+
+// Breakpoints extra para pantallas pequeñas
+@media (max-width: 480px) {
+  .dialog-content {
+    width: 96vw;
+    padding: 0.75rem;
+  }
+  .formulario-dos-columnas {
+    gap: 0.75rem;
+  }
+}
+
+// Ajustes para evitar truncamiento de texto en modales/inputs del formulario de productos
+.campo-moderno .input-moderno {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.campo-moderno .url-actual a {
+  display: inline-block;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+// Control de desbordes de texto en inputs modernos
+input.input-moderno {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.productos-container {
+  padding: 2rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-radius: 1rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  transition: background 0.3s, color 0.3s;
+  margin-top: 5rem;
+}
+
+.productos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+
+    h2 {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+
+      .contador-productos {
+        background: #FFD166;
+        color: #000;
+        padding: 0.2rem 0.6rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .input-busqueda {
+      min-width: 250px;
+      max-width: 350px; // Unificado con Clientes
+      padding: 0.6rem 1rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background-color: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+
+      &::placeholder { color: #9ca3af; }
+      &:focus {
+        border-color: #ffc600;
+        box-shadow: 0 0 0 3px rgba(255, 198, 0, 0.3);
+        outline: none;
+      }
+    }
+
+    .btn-agregar {
+      background-color: #FFD166;
+      color: #000;
+      padding: 0.5rem 1.3rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 0.6rem;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transition: 0.2s ease-in-out;
+
+      &:hover {
+        background-color: #FFC107;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(255, 209, 102, 0.15);
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    .header-left { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+    .header-right { justify-content: space-between; flex-wrap: wrap; }
+  }
+}
+
+.tabla-wrapper {
+  border-radius: 0.8rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background-color: var(--input-bg);
+  margin-bottom: 1rem;
+  /* Sin scroll horizontal: la tabla se ajusta al ancho disponible */
+  overflow: visible;
+  /* sin reserva adicional, permitir ajustar al contenedor */
+  padding-right: 0;
+  background-clip: padding-box;
+}
+
+.tabla-productos {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  overflow: visible; /* no recortar la columna sticky de Acciones */
+  table-layout: fixed; /* distribuir anchos de manera estable */
+
+  thead {
+    background-color: #f3f4f6;
+    color: #374151;
+    text-align: left;
+  }
+
+  /* Cabeceras en una sola línea, sin cortes de palabra */
+  thead th {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+
+  th, td {
+    padding: 0.75rem 1.2rem; /* aumentar espacio horizontal entre columnas */
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Compactar distancia entre ID y columnas siguientes */
+  thead th:nth-child(1),
+  tbody td:nth-child(1) {
+    width: 68px;
+    min-width: 68px;
+    text-align: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  tbody {
+    background-color: var(--input-bg);
+
+    tr {
+      border-bottom: 1px solid #e5e7eb;
+
+      &:hover { background-color: #eef2ff; }
+
+      
+
+      .estado {
+        padding: 0.35rem 0.8rem;
+        border-radius: 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &.activa, &.activo {
+          background-color: #dcfce7;
+          color: #065f46;
+        }
+
+        &.anulada, &.inactivo {
+          background-color: #fee2e2;
+          color: #991b1b;
+        }
+      }
+
+      .acciones {
+        display: flex;
+        gap: 8px; /* igual que Clientes */
+        justify-content: center;
+        align-items: center;
+
+        .btn-icono {
+          width: 36px; /* igual que Clientes */
+          height: 36px;
+          justify-content: center;
+          align-items: center;
+          border-radius: 6px;
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          transition: transform 0.2s ease, background-color 0.2s ease;
+
+          &:hover { transform: scale(1.05); }
+
+          &.btn-detalles {
+            color: #3b82f6;
+            &:hover { background-color: rgba(59, 130, 246, 0.1); }
+          }
+          &.btn-editar {
+            color: #10b981;
+            &:hover { background-color: rgba(16, 185, 129, 0.1); }
+          }
+          &.btn-eliminar {
+            color: #dc2626;
+            &:hover { background-color: rgba(220, 38, 38, 0.1); }
+          }
+        }
+      }
+    }
+
+    .sin-resultados {
+      text-align: center;
+      padding: 2rem;
+      font-style: italic;
+      color: #9ca3af;
+    }
+  }
+}
+
+// Columna de imagen: tamaño fijo y miniatura
+tbody td.columna-imagen {
+  width: 120px;
+  min-width: 120px;
+}
+
+.imagen-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.imagen-thumbnail {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.imagen-placeholder {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background-color: #f3f4f6;
+}
+
+.url-texto {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  a { color: #6b7280; }
+}
+
+// Alineación de columna Acciones como Clientes
+thead th:last-child {
+  text-align: center;
+  width: 180px; /* igual que Clientes */
+  min-width: 180px;
+}
+
+tbody td.acciones {
+  text-align: center;
+  white-space: normal;
+  width: 180px; /* igual que Clientes */
+  min-width: 180px;
+}
+
+/* Mantener visible la columna Acciones pegada al borde derecho */
+.tabla-productos thead th:last-child { text-align: center; }
+.tabla-productos tbody td.acciones { text-align: center; }
+
+// Estilos de acciones cuando la fila está inactiva
+.tabla-productos tbody tr.fila-anulada {
+  .acciones {
+    .btn-icono.btn-detalles {
+      color: #374151; // más oscuro
+      opacity: 0.9;
+    }
+    .btn-icono.btn-editar,
+    .btn-icono.btn-eliminar {
+      opacity: 0.35; // más transparente
+    }
+  }
+}
+
+.tabla-productos thead .columna-precio,
+.tabla-productos thead .columna-ganancia,
+.tabla-productos thead .columna-stock {
+  text-align: right;
+}
+
+/* Centrar encabezado y celdas de Estado y Acciones */
+.tabla-productos thead th:nth-child(11),
+.tabla-productos tbody td:nth-child(11) {
+  text-align: center;
+}
+
+.tabla-productos tbody td.columna-precio,
+.tabla-productos tbody td.columna-ganancia,
+.tabla-productos tbody td.columna-stock {
+  text-align: right;
+  white-space: normal;
+}
+
+.tabla-productos tbody td.columna-ganancia .input-moderno {
+  width: 80px;
+  min-width: 80px;
+  padding: 0.3rem 0.5rem;
+  text-align: right;
+}
+
+/* Mantener todas las columnas de texto en una sola línea con elipsis */
+.tabla-productos tbody td.columna-nombre,
+.tabla-productos tbody td.columna-categoria,
+.tabla-productos tbody td.columna-medida,
+.tabla-productos tbody td.columna-marca {
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Nombre no debe partirse en varias líneas */
+.tabla-productos tbody td.columna-nombre {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: keep-all;
+  min-width: 260px;
+  padding-left: 1rem;
+}
+
+/* Descripción compacta con elipsis (multilínea) y tooltip para ver completa */
+.tabla-productos tbody td.columna-descripcion {
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow: hidden;
+  min-width: 320px;
+}
+.tabla-productos tbody td.columna-descripcion .descripcion-texto {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Sin expansión al hover: mantener altura estable */
+
+/* Evitar que el chip de estado parta el texto (Activo/Inactivo) */
+.tabla-productos tbody td.columna-estado .estado {
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.tabla-productos tbody td.columna-categoria { min-width: 180px; }
+.tabla-productos tbody td.columna-medida { min-width: 120px; }
+.tabla-productos tbody td.columna-marca { min-width: 160px; }
+.tabla-productos tbody td.columna-estado .estado-badge { white-space: nowrap; }
+
+/* Overrides y añadidos específicos de Productos */
+.dialog-title {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  padding: 0.75rem 0 0.9rem 0;
+}
+
+.productos-header .header-right .btn-volver {
+  background-color: #e5e7eb;
+  color: #111827;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 0.6rem;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+.productos-header .header-right .btn-volver:hover {
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.input-stock {}
+
+.productos-footer {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.tabla-productos tbody .estado-badge {
+  padding: 0.35rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: default;
+  transition: all 0.2s ease;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.tabla-productos tbody .estado-badge.activo {
+  background-color: #dcfce7;
+  color: #065f46;
+}
+.tabla-productos tbody .estado-badge.inactivo {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+// Indicadores de no editable
+select.input-moderno:disabled,
+input.input-moderno[readonly],
+.input-disabled {
+  cursor: not-allowed;
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+}
+select.input-moderno:disabled:hover,
+input.input-moderno[readonly]:hover,
+.input-disabled:hover {
+  cursor: not-allowed;
+}

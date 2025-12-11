@@ -1,0 +1,28 @@
+// Estilos compartidos para acciones en filas inactivas
+
+// Estado visual para botones deshabilitados
+.btn-icono:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+// Filas inactivas: resalta "ver" y atenúa editar/eliminar
+.fila-anulada {
+  .acciones, .acciones-tabla {
+    .btn-icono.btn-detalles,
+    .btn-icono.ver {
+      color: #374151;
+      opacity: 0.9;
+    }
+
+    .btn-icono.btn-editar,
+    .btn-icono.editar,
+    .btn-icono.btn-eliminar,
+    .btn-icono.eliminar {
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: none; // seguridad adicional si algún botón no usa disabled
+    }
+  }
+}
