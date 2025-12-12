@@ -1,0 +1,439 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Fredoka+One:wght@400&family=Nunito:wght@300;400;500;600;700;800&display=swap');
+
+// Variables
+$primary-yellow: #FFFEF7;
+$secondary-yellow: #FFFBF0;
+$yellow-card: #F4D03F;
+$warm-white: #FFFFFF;
+$text-dark: #2C3E50;
+$text-light: #6C757D;
+$accent-yellow: #F39C12;
+$shadow-light: rgba(0, 0, 0, 0.1);
+$shadow-medium: rgba(0, 0, 0, 0.15);
+$border-light: #E9ECEF;
+
+// Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin transition-smooth {
+  transition: all 0.3s ease;
+}
+
+// Fondo principal
+.verify-code-background {
+  min-height: 100vh;
+  background: linear-gradient(135deg, $primary-yellow 0%, $secondary-yellow 100%);
+  @include flex-center;
+  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+// Contenedor principal
+.verify-code-container {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  height: 600px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    height: auto;
+    max-width: 400px;
+  }
+}
+
+// Tarjeta izquierda amarilla
+.pet-love-card {
+  background: linear-gradient(135deg, $yellow-card 0%, #F7DC6F 100%);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 40px;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 40px 20px;
+    min-height: 300px;
+  }
+  
+  .logo-container {
+    margin-bottom: 30px;
+    position: relative;
+    z-index: 2;
+    
+    .logo-circle {
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(44, 62, 80, 0.1);
+      
+      .paw-icon {
+        filter: drop-shadow(0 2px 4px rgba(44, 62, 80, 0.2));
+      }
+    }
+  }
+  
+  .pet-love-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.5rem;
+    color: $text-dark;
+    text-align: center;
+    margin: 20px 0 10px 0;
+    text-shadow: 0 2px 4px rgba(44, 62, 80, 0.1);
+    position: relative;
+    z-index: 2;
+    
+    @media (max-width: 768px) {
+      font-size: 2rem;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: 1.8rem;
+    }
+  }
+  
+  .pet-love-subtitle {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem;
+    color: $text-dark;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 600;
+    opacity: 0.9;
+    position: relative;
+    z-index: 2;
+    
+    @media (max-width: 768px) {
+      font-size: 1rem;
+    }
+  }
+  
+  .verification-message {
+    text-align: center;
+    margin-bottom: 30px;
+    margin-top: 20px;
+    position: relative;
+    z-index: 2;
+    
+    h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin: 0 0 10px 0;
+      color: #2C3E50;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 2;
+      
+      &::before {
+         content: '';
+         position: absolute;
+         bottom: -3px;
+         left: 50%;
+         transform: translateX(-50%);
+         width: 60px;
+         height: 3px;
+         background: linear-gradient(90deg, #FFD54F, #FFC107, #E0A800);
+         border-radius: 2px;
+         box-shadow: 0 2px 6px rgba(224, 168, 0, 0.3);
+       }
+      
+      @media (max-width: 768px) {
+        font-size: 1.3rem;
+      }
+    }
+    
+    p {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin: 0;
+      color: $text-dark;
+      font-weight: 500;
+      position: relative;
+      z-index: 2;
+    }
+  }
+  
+  .features {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      color: $text-dark;
+      position: relative;
+      z-index: 2;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateX(5px);
+      }
+      
+      .feature-icon {
+        font-size: 1.4rem;
+        width: 32px;
+        height: 32px;
+        text-align: center;
+        color: #FFFFFF;
+        font-weight: 700;
+        background: linear-gradient(135deg, #27AE60, #2ECC71);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+      }
+    }
+  }
+}
+
+// Contenedor del formulario derecho
+.verify-form-container {
+  flex: 1;
+  background: $warm-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  
+  @media (max-width: 768px) {
+    padding: 30px 20px;
+  }
+  
+  .verify-form-card {
+    width: 100%;
+    max-width: 400px;
+    
+    .form-header {
+      text-align: center;
+      margin-bottom: 40px;
+      
+      h2 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: $text-dark;
+        margin-bottom: 10px;
+        
+        @media (max-width: 768px) {
+          font-size: 1.6rem;
+        }
+      }
+      
+      p {
+        font-family: 'Nunito', sans-serif;
+        color: $text-light;
+        font-size: 0.95rem;
+        margin: 0;
+        
+        strong {
+          color: $text-dark;
+        }
+      }
+    }
+    
+    .verify-form {
+      .input-group {
+        margin-bottom: 25px;
+        
+        label {
+          display: block;
+          font-family: 'Poppins', sans-serif;
+          font-weight: 600;
+          color: $text-dark;
+          margin-bottom: 8px;
+          font-size: 0.95rem;
+        }
+        
+        .code-input {
+          width: 100%;
+          padding: 16px 20px;
+          border: 2px solid $border-light;
+          border-radius: 12px;
+          font-size: 1.5rem;
+          font-weight: 700;
+          font-family: 'Poppins', sans-serif;
+          text-align: center;
+          letter-spacing: 8px;
+          color: $text-dark;
+          background: #FAFBFC;
+          @include transition-smooth;
+          
+          &:focus {
+            outline: none;
+            border-color: $yellow-card;
+            background: $warm-white;
+            box-shadow: 0 0 0 3px rgba(244, 208, 63, 0.1);
+          }
+          
+          &::placeholder {
+            color: #BDC3C7;
+            letter-spacing: 4px;
+          }
+          
+          &:disabled {
+            background: #F8F9FA;
+            cursor: not-allowed;
+          }
+        }
+      }
+      
+      .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, $yellow-card 0%, $yellow-card 100%);
+        color: $text-dark;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 25px;
+        position: relative;
+        overflow: hidden;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+          transition: left 0.6s ease;
+        }
+        
+        &:hover {
+          background: linear-gradient(135deg, $yellow-card 0%, #F7DC6F 100%);
+          transform: translateY(-3px);
+          box-shadow: 0 8px 25px rgba(244, 208, 63, 0.4), 0 4px 12px rgba(0, 0, 0, 0.1);
+          
+          &::before {
+            left: 100%;
+          }
+        }
+        
+        &:disabled {
+          background: #E9ECEF;
+          color: #6C757D;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+          
+          &::before {
+            display: none;
+          }
+        }
+      }
+    }
+    
+    .form-footer {
+      text-align: center;
+      
+      .back-link, .resend-link {
+        background: none;
+        border: none;
+        color: $text-light;
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        @include transition-smooth;
+        margin: 5px 0;
+        display: block;
+        width: 100%;
+        
+        &:hover {
+          color: $yellow-card;
+        }
+        
+        &:disabled {
+          color: #BDC3C7;
+          cursor: not-allowed;
+        }
+      }
+      
+      .back-link {
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+      
+      .resend-link {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// Animación flotante
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+// Responsive adicional
+@media (max-width: 480px) {
+  .verify-code-background {
+    padding: 10px;
+  }
+  
+  .verify-code-container {
+    border-radius: 15px;
+  }
+  
+  .pet-love-card {
+    padding: 30px 15px;
+  }
+  
+  .verify-form-container {
+    padding: 20px 15px;
+  }
+}

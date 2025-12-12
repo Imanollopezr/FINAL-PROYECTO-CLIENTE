@@ -1,0 +1,203 @@
+/* Animaciones de hover globales para todos los módulos */
+
+/* Animación de salto base */
+.hover-bounce {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.hover-bounce:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Paneles del dashboard */
+.panel {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.panel:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+/* Tarjetas */
+.card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Botones principales */
+.btn,
+.btn-agregar,
+.btn-confirmar,
+.btn-confirmar-producto,
+.btn-confirmar-compra,
+.btn-confirmar-venta,
+.btn-cancelar,
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-login,
+.btn-register,
+.btn-reset {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+}
+
+.btn:hover,
+.btn-agregar:hover,
+.btn-confirmar:hover,
+.btn-confirmar-producto:hover,
+.btn-confirmar-compra:hover,
+.btn-confirmar-venta:hover,
+.btn-cancelar:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-outline:hover,
+.btn-login:hover,
+.btn-register:hover,
+.btn-reset:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Botones de iconos */
+.btn-icono,
+.btn-editar,
+.btn-eliminar,
+.btn-detalles,
+.btn-ver,
+.btn-toggle {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+}
+
+.btn-icono:hover,
+.btn-editar:hover,
+.btn-eliminar:hover,
+.btn-detalles:hover,
+.btn-ver:hover,
+.btn-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+}
+
+/* Elementos de navegación */
+.sidebar-item,
+.nav-item,
+.menu-item {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-item:hover,
+.nav-item:hover,
+.menu-item:hover {
+  transform: translateY(-2px);
+}
+
+/* Filas de tabla */
+.table-row,
+tbody tr {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
+}
+
+.table-row:hover,
+tbody tr:hover {
+  transform: translateY(-1px);
+}
+
+/* Módulos de contenido */
+.content-module,
+.widget,
+.dashboard-widget {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.content-module:hover,
+.widget:hover,
+.dashboard-widget:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* Elementos interactivos pequeños */
+.interactive-element,
+.clickable {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interactive-element:hover,
+.clickable:hover {
+  transform: translateY(-2px);
+}
+
+/* Desactivar animación para elementos deshabilitados */
+.btn:disabled,
+.btn.disabled,
+.panel.disabled,
+.card.disabled {
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Animación especial para elementos con acento amarillo */
+.accent-hover {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.accent-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+}
+
+/* Reducir movimiento para usuarios que prefieren menos animación */
+@media (prefers-reduced-motion: reduce) {
+  .hover-bounce,
+  .panel,
+  .card,
+  .btn,
+  .btn-agregar,
+  .btn-confirmar,
+  .btn-icono,
+  .sidebar-item,
+  .nav-item,
+  .table-row,
+  tbody tr,
+  .content-module,
+  .widget,
+  .interactive-element {
+    transition: none !important;
+  }
+  
+  .hover-bounce:hover,
+  .panel:hover,
+  .card:hover,
+  .btn:hover,
+  .btn-agregar:hover,
+  .btn-confirmar:hover,
+  .btn-icono:hover,
+  .sidebar-item:hover,
+  .nav-item:hover,
+  .table-row:hover,
+  tbody tr:hover,
+  .content-module:hover,
+  .widget:hover,
+  .interactive-element:hover {
+    transform: none !important;
+  }
+}
+
+/* Fix: normaliza el botón de eliminar para evitar puntos rojos fuera de lugar */
+.btn-icono.btn-eliminar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.btn-icono.btn-eliminar::before {
+  content: none !important;
+}

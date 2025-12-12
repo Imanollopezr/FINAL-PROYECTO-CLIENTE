@@ -1,0 +1,77 @@
+/* Estilos uniformes para botones Agregar y Confirmar */
+
+.btn-agregar,
+.btn-confirmar,
+.btn-confirmar-producto,
+.btn-confirmar-compra,
+.btn-confirmar-venta {
+  background: linear-gradient(135deg, #ffc600, #e6b300) !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(255, 198, 0, 0.3) !important;
+  padding: 1rem 2.5rem !important;
+  font-size: 1rem !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  letter-spacing: 0.025em !important;
+  display: block !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+}
+
+.btn-agregar:hover,
+.btn-confirmar:hover,
+.btn-confirmar-producto:hover,
+.btn-confirmar-compra:hover,
+.btn-confirmar-venta:hover {
+  background: linear-gradient(135deg, #e6b300, #cc9900) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(255, 198, 0, 0.4) !important;
+}
+
+.btn-agregar::before,
+.btn-confirmar::before,
+.btn-confirmar-producto::before,
+.btn-confirmar-compra::before,
+.btn-confirmar-venta::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+  transition: left 0.5s !important;
+}
+
+.btn-agregar:hover::before,
+.btn-confirmar:hover::before,
+.btn-confirmar-producto:hover::before,
+.btn-confirmar-compra:hover::before,
+.btn-confirmar-venta:hover::before {
+  left: 100% !important;
+}
+
+/* Botones redondos específicos mantienen su forma pero adoptan los colores */
+.btn-redondo.btn-agregar-producto,
+.btn-redondo.btn-confirmar-compra,
+.btn-redondo.btn-confirmar-venta {
+  background-color: #FFC107 !important;
+  color: #000000 !important;
+  font-weight: bold !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+  transition: background-color 0.3s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease !important;
+}
+
+.btn-redondo.btn-agregar-producto:hover,
+.btn-redondo.btn-confirmar-compra:hover,
+.btn-redondo.btn-confirmar-venta:hover {
+  background-color: #e0a800 !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}

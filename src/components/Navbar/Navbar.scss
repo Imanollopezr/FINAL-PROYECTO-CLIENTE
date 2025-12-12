@@ -1,0 +1,134 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  z-index: 1000;
+  transition: var(--default-transition);
+  backdrop-filter: blur(6px);
+}
+
+.navbar--light {
+  .navbar-logo-text { color: #111827; }
+  .navbar-email { background: #f3f4f6; color: #111827; }
+  .logout-btn { background: #111827; color: #ffffff; }
+  .logout-btn:hover { background: #374151; }
+}
+
+/* Contenedor de logo + texto */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-toggle {
+  display: none;
+  border: none;
+  background: var(--primary-color);
+  color: var(--dark-color);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--border-radius-md);
+  font-size: 18px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: var(--default-transition);
+}
+
+@media (max-width: 768px) {
+  .navbar-toggle {
+    display: inline-flex;
+  }
+}
+
+.navbar-logo-img {
+  height: 40px;
+  width: auto;
+  transition: var(--default-transition);
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.navbar-logo-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--xl-text-color);
+  font-family: var(--font-family-headings);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Contenedor de email + botón */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Email */
+.navbar-email {
+  font-size: 14px;
+  color: var(--lg-text-color);
+  background: var(--side-link-hover-color);
+  padding: 8px 16px;
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+}
+
+/* Botón de logout */
+.logout-btn {
+  background: var(--primary-color);
+  color: var(--dark-color);
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--border-radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--default-transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  svg {
+    font-size: 18px;
+  }
+}
+
+/* Hover del botón */
+.logout-btn:hover {
+  background: var(--primary-hover-color);
+  transform: translateY(-2px);
+}
+
+.navbar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+}
+.navbar-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.navbar-avatar span {
+  font-weight: 700;
+  color: #111827;
+}
