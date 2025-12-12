@@ -30,6 +30,7 @@ $border-light: #E9ECEF;
   @include flex-center;
   padding: 20px;
   font-family: 'Montserrat', sans-serif;
+  position: relative;
 }
 
 // Contenedor principal
@@ -343,6 +344,32 @@ $border-light: #E9ECEF;
   width: 100%;
   max-width: 350px;
   
+  .back-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .btn-back {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+    border: 1px solid $border-light;
+    color: $text-dark;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px 12px;
+    cursor: pointer;
+    @include transition-smooth;
+    
+    &:hover {
+      background: linear-gradient(135deg, #FFF8E1 0%, #FFFFFF 100%);
+      border-color: #FFC107;
+      box-shadow: 0 4px 10px rgba(255, 193, 7, 0.2);
+      transform: translateY(-1px);
+    }
+  }
+  
   .form-header {
     text-align: center;
     margin-bottom: 30px;
@@ -424,6 +451,40 @@ $border-light: #E9ECEF;
         50% { opacity: 1; transform: scale(1.2); }
       }
     }
+  }
+}
+
+// Botón global fuera del formulario, fijado en esquina superior izquierda
+.back-button-global {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid $border-light;
+  color: $text-dark;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 10px;
+  line-height: 1;
+  box-shadow: 0 8px 20px $shadow-light;
+  z-index: 1000;
+  backdrop-filter: saturate(180%) blur(6px);
+  @include transition-smooth;
+
+  &:hover {
+    background: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px $shadow-medium;
+  }
+}
+
+@media (max-width: 768px) {
+  .back-button-global {
+    top: 12px;
+    left: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
   }
 }
 

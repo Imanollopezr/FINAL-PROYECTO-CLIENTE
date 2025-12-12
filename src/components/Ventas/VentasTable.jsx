@@ -713,12 +713,24 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
     }
   };
   const normalizarEstado = (s) => {
-    const t = (s || '').toLowerCase();
-    if (t === 'activa' || t === 'completada') return 'Pagado';
-    if (t === 'pendiente') return 'Pendiente';
-    if (t === 'en proceso') return 'Pendiente';
-    if (t === 'anulada') return 'INHABILITADA';
-    return t || 'Pagado';
+    const t = String(s || '').trim().toLowerCase();
+    if (!t) return 'Pendiente';
+    if ([
+      'pagado','pago','paid',
+      'confirmado','confirmada',
+      'completado','completada',
+      'activa','activo'
+    ].includes(t)) return 'Pagado';
+    if ([
+      'pendiente','por pagar',
+      'en proceso','procesando'
+    ].includes(t)) return 'Pendiente';
+    if ([
+      'anulada','anulado',
+      'cancelada','cancelado',
+      'inhabilitada','inhabilitado'
+    ].includes(t)) return 'Inhabilitada';
+    return t.charAt(0).toUpperCase() + t.slice(1);
   };
   const ventasFiltradas = ventas
     .filter(v =>

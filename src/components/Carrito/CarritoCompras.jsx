@@ -221,7 +221,7 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
         .includes('admin');
       // Derivar nombre y apellidos correctamente cuando solo hay nombre completo
       const fullName = isAdminUser ? '' : (user?.name ?? user?.Nombre ?? '');
-      let nombreDefault = isAdminUser ? '' : (user?.nombres ?? '');
+      let nombreDefault = isAdminUser ? '' : (user?.nombres ?? user?.nombre ?? '');
       let apellidoDefault = isAdminUser ? '' : (user?.apellidos ?? user?.apellido ?? user?.Apellidos ?? user?.lastName ?? '');
       if (!nombreDefault && !apellidoDefault && fullName) {
         const parts = String(fullName).trim().split(/\s+/);
@@ -247,7 +247,14 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
       let ciudadDefault = isAdminUser ? '' : (me?.ciudad ?? me?.Ciudad ?? user?.ciudad ?? user?.Ciudad ?? '');
       if (me) {
         nombreDefault = me?.nombres ?? me?.nombre ?? nombreDefault;
-        apellidoDefault = me?.apellidos ?? apellidoDefault;
+        apellidoDefault = me?.apellidos ?? me?.apellido ?? me?.Apellido ?? me?.Apellidos ?? apellidoDefault;
+      }
+      if (nombreDefault && !apellidoDefault) {
+        const parts = String(nombreDefault).trim().split(/\s+/);
+        if (parts.length > 1) {
+          nombreDefault = parts[0];
+          apellidoDefault = parts.slice(1).join(' ');
+        }
       }
       const formHtml = `
         <div class="checkout-form">
@@ -257,11 +264,11 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
           </div>
           <div class="form-row">
             <label>Nombre</label>
-            <input id="nombre" type="text" placeholder="Nombre" value="${nombreDefault}" />
+            <input id="nombre" type="text" placeholder="Nombre" value="${nombreDefault}" readonly />
           </div>
           <div class="form-row">
             <label>Apellidos</label>
-            <input id="apellido" type="text" placeholder="Apellidos" value="${apellidoDefault}" />
+            <input id="apellido" type="text" placeholder="Apellidos" value="${apellidoDefault}" readonly />
           </div>
           <div class="form-row">
             <label>Teléfono</label>

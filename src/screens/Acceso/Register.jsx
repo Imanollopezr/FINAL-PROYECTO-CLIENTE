@@ -143,6 +143,21 @@ const Register = () => {
 
   return (
     <div className="register-background">
+      <button
+        type="button"
+        className="back-button-global"
+        aria-label="Volver atrás"
+        onClick={() => {
+          try {
+            if (window.history.length > 1) navigate(-1);
+            else navigate('/login');
+          } catch {
+            navigate('/login');
+          }
+        }}
+      >
+        ← Volver atrás
+      </button>
       <div className="register-container">
         {/* ===== SECCIÓN IZQUIERDA - INFORMACIÓN DE LA MARCA ===== */}
         <motion.div 
