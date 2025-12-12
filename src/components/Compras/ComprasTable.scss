@@ -488,6 +488,27 @@ body.dark-mode {
   padding: 0.5rem;
 }
 
+.detalles-contenido > .seccion-detalles-base {
+  width: 100%;
+}
+
+/* Fuerza una sola columna dentro del modal de agregar compra */
+.dialog-agregar .detalles-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+.dialog-agregar .seccion-detalles-base {
+  width: 100%;
+}
+.dialog-agregar .formulario-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+
+
 .detalles-dos-columnas {
   display: grid;
   grid-template-columns: 1fr 1fr;

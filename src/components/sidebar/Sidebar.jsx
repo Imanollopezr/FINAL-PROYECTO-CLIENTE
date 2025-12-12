@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useCallback } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
 import HuellaPetLove from "../../assets/images/Huella_Petlove.png";
 
@@ -36,6 +36,7 @@ const Sidebar = () => {
   
   // Obtener el rol del usuario
   const userRole = user?.role || 'Usuario';
+  const roleNameLc = String(user?.role || user?.Rol || user?.nombreRol || '').toLowerCase();
   
   // Debug: Verificar el rol del usuario en el Sidebar
   console.log('🔍 DEBUG - Sidebar información del usuario:');
@@ -88,6 +89,7 @@ const Sidebar = () => {
 
     // Dashboard requiere permiso explícito
     if (menuItem === 'dashboard') {
+      if (userRole === 'Cliente') return false;
       return permisosUsuario.includes('VerDashboard');
     }
 
@@ -99,7 +101,7 @@ const Sidebar = () => {
     return hasAccess;
   };
 
-  const handleClickOutside = (event) => {
+  const handleClickOutside = useCallback((event) => {
     if (
       navbarRef.current &&
       !navbarRef.current.contains(event.target) &&
@@ -107,7 +109,7 @@ const Sidebar = () => {
     ) {
       closeSidebar();
     }
-  };
+  }, [navbarRef, closeSidebar]);
 
   // Cierre de sesión se ejecuta desde otros lugares del UI
 
@@ -116,7 +118,7 @@ const Sidebar = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [handleClickOutside]);
 
   // Configuración de ítems y módulos
   const itemsConfig = {
@@ -124,13 +126,12 @@ const Sidebar = () => {
     catalogo: { path: '/productos-tienda', label: 'Catálogo', icon: MdOutlineShoppingBag },
     carrito: { path: '/productos-tienda?carrito=open', label: 'Mi carrito', icon: MdOutlineShoppingCart },
     perfil: { path: '/mi-cuenta', label: 'Perfil', icon: MdOutlinePerson },
-    dashboard: { path: '/dashboard', label: 'Gráficos', icon: MdOutlineGridView },
     roles: { path: '/roles', label: 'Roles', icon: MdOutlineAssignmentInd },
     usuarios: { path: '/usuarios', label: 'Usuarios', icon: MdOutlinePerson },
     clientes: { path: '/clientes', label: 'Clientes', icon: MdOutlinePeople },
     proveedores: { path: '/proveedores', label: 'Proveedores', icon: MdOutlineAssignmentInd },
     compras: { path: '/compras', label: 'Compras', icon: MdOutlineShoppingCart },
-    ventas: { path: '/ventas', label: 'Ventas', icon: MdOutlineShoppingCart },
+    ventas: { path: '/ventas', label: (roleNameLc === 'cliente' ? 'Compras' : 'Ventas'), icon: MdOutlineShoppingCart },
     pedidos: { path: '/pedidos', label: 'Pedidos', icon: MdOutlineRequestQuote },
     productos: { path: '/productos', label: 'Productos', icon: MdOutlineShoppingBag },
     categorias: { path: '/categorias', label: 'Categorías', icon: MdOutlineCategory },
@@ -142,7 +143,6 @@ const Sidebar = () => {
   };
 
   const modules = [
-    { title: 'Dashboard', items: ['dashboard'] },
     { title: 'Acceso', items: ['roles', 'usuarios'] },
     { title: 'Gestión', items: ['clientes', 'proveedores'] },
     { title: 'Operaciones', items: ['compras', 'pedidos', 'ventas'] },

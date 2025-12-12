@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import medidasService from '../../services/medidasService';
 import { API_ENDPOINTS, DEFAULT_HEADERS, buildApiUrl } from '../../constants/apiConstants';
@@ -41,7 +41,7 @@ const MedidasTable = ({ mode = 'medidas' }) => {
   // const [filtroDia, setFiltroDia] = useState(''); // Eliminado
 
   // Función para cargar medidas desde la API
-  const cargarMedidas = async () => {
+  const cargarMedidas = useCallback(async () => {
     const signal = nextSignal();
     try {
       setLoading(true);
@@ -59,10 +59,9 @@ const MedidasTable = ({ mode = 'medidas' }) => {
         list = Array.isArray(data) ? data : [];
       }
       setMedidas(list);
-      // Ajuste de paginación si la página actual superó el total de páginas
       const totalPaginasData = Math.ceil(((list?.length || 0)) / medidasPorPagina);
-      if (paginaActual > totalPaginasData && totalPaginasData >= 1) {
-        setPaginaActual(totalPaginasData);
+      if (totalPaginasData >= 1) {
+        setPaginaActual(prev => Math.min(prev, totalPaginasData));
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
@@ -72,19 +71,14 @@ const MedidasTable = ({ mode = 'medidas' }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [effectiveMode, medidasPorPagina, nextSignal]);
 
-  const esTallaValida = (m) => {
-    const valNom = String(m?.nombre || '').toUpperCase().trim();
-    const valAbr = String(m?.abreviatura || '').toUpperCase().trim();
-    const set = new Set(['XXS','XS','S','M','L','XL','XXL','XXXL','U','UNICO']);
-    return set.has(valNom) || set.has(valAbr);
-  };
+  
 
   // Eliminado: agregarTallasComunes
 
   // Función para buscar medidas
-  const buscarMedidas = async (termino) => {
+  const buscarMedidas = useCallback(async (termino) => {
     if (!termino.trim()) {
       cargarMedidas();
       return;
@@ -106,9 +100,9 @@ const MedidasTable = ({ mode = 'medidas' }) => {
         const data = await medidasService.buscarMedidas(termino);
         setMedidas(Array.isArray(data) ? data : []);
       }
-    } catch (error) {
+      } catch (error) {
       try {
-        const base = (medidas && medidas.length > 0) ? medidas : await medidasService.obtenerMedidas();
+        const base = await medidasService.obtenerMedidas();
         const lower = termino.toLowerCase();
         const filtradoLocal = (base || []).filter(m =>
           String(m?.nombre || '').toLowerCase().includes(lower) ||
@@ -123,7 +117,7 @@ const MedidasTable = ({ mode = 'medidas' }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [effectiveMode, cargarMedidas]);
 
   // Efecto para búsqueda con debounce (evitar ejecución en el primer render)
   const firstSearchRef = useRef(true);
@@ -141,15 +135,13 @@ const MedidasTable = ({ mode = 'medidas' }) => {
     }, 400);
 
     return () => clearTimeout(timeoutId);
-  }, [busqueda]);
+  }, [busqueda, buscarMedidas, cargarMedidas]);
 
   useEffect(() => {
-    // reset al cambiar entre rutas de medidas/tallas
     setBusqueda('');
     setPaginaActual(1);
     cargarMedidas();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectiveMode]);
+  }, [effectiveMode, cargarMedidas]);
 
   const validarMedida = (medida) => {
     const nombre = String(medida?.nombre || '').trim();
@@ -182,7 +174,9 @@ const MedidasTable = ({ mode = 'medidas' }) => {
       cargarMedidas();
     } catch (error) {
       console.error('Error al agregar medida:', error);
-      AlertService.error('Error', 'No se pudo agregar la medida.');
+      const msg = (error?.message || '').toLowerCase();
+      const friendly = msg.includes('ya existe') ? 'Ya existe una medida con este nombre.' : (error?.message || 'No se pudo agregar la medida.');
+      AlertService.error('Error', friendly);
     }
   };
 
@@ -210,14 +204,14 @@ const MedidasTable = ({ mode = 'medidas' }) => {
       if (effectiveMode === 'tallas') {
         const bearer = getStoreToken();
         const headers = bearer ? { ...DEFAULT_HEADERS, Authorization: `Bearer ${bearer}`, 'Content-Type': 'application/json' } : { ...DEFAULT_HEADERS, 'Content-Type': 'application/json' };
+        const idTalla = parseInt(editandoMedida?.idTalla ?? editandoMedida?.idMedida ?? editandoMedida?.id, 10);
         const payload = {
-          IdTalla: editandoMedida.idMedida,
           Nombre: nuevaMedida.nombre,
           Abreviatura: nuevaMedida.abreviatura || '',
           Descripcion: nuevaMedida.descripcion || '',
           Activo: nuevaMedida.activo
         };
-        const resp = await fetch(buildApiUrl(`/api/tallas/${editandoMedida.idMedida}`), { method: 'PUT', headers, credentials: 'include', body: JSON.stringify(payload) });
+        const resp = await fetch(buildApiUrl(`/api/tallas/${idTalla}`), { method: 'PUT', headers, credentials: 'include', body: JSON.stringify(payload) });
         if (!resp.ok) {
           const errTxt = await resp.text().catch(() => '');
           throw new Error(`Error ${resp.status}: ${errTxt || resp.statusText}`);
@@ -312,11 +306,7 @@ const MedidasTable = ({ mode = 'medidas' }) => {
     }
   };
 
-  const limpiarFormulario = () => {
-    setNuevaMedida({ nombre: '', descripcion: '', activo: true });
-    setEditandoMedida(null);
-    setMostrarFormulario(false);
-  };
+  
 
   const verDetalles = (medida) => {
     setMedidaSeleccionada(medida);
@@ -324,23 +314,30 @@ const MedidasTable = ({ mode = 'medidas' }) => {
   };
 
   // Filtrar medidas por fecha (ya que la búsqueda por texto se hace en el backend)
-  const medidasFiltradas = effectiveMode === 'tallas'
-    ? (medidas || []).filter(m => TALLAS_COMUNES.includes(String(m?.nombre || '').toUpperCase().trim()))
-    : medidas;
+  const medidasFiltradas = useMemo(() => {
+    return effectiveMode === 'tallas'
+      ? (medidas || []).filter(m => TALLAS_COMUNES.includes(String(m?.nombre || '').toUpperCase().trim()))
+      : (Array.isArray(medidas) ? medidas : []);
+  }, [effectiveMode, medidas]);
 
   // Paginación
-  const indiceUltimaMedida = paginaActual * medidasPorPagina;
-  const indicePrimeraMedida = indiceUltimaMedida - medidasPorPagina;
-  const medidasActuales = medidasFiltradas.slice(indicePrimeraMedida, indiceUltimaMedida);
-  const totalPaginas = Math.ceil(medidasFiltradas.length / medidasPorPagina);
+  const totalPaginas = useMemo(() => Math.max(1, Math.ceil((medidasFiltradas.length || 0) / medidasPorPagina)), [medidasFiltradas.length, medidasPorPagina]);
+  const medidasActuales = useMemo(() => {
+    const pagina = Math.min(paginaActual, totalPaginas);
+    const indiceUltimaMedida = pagina * medidasPorPagina;
+    const indicePrimeraMedida = indiceUltimaMedida - medidasPorPagina;
+    return medidasFiltradas.slice(indicePrimeraMedida, indiceUltimaMedida);
+  }, [paginaActual, medidasPorPagina, medidasFiltradas, totalPaginas]);
 
-  const cambiarPagina = (numeroPagina) => {
-    setPaginaActual(numeroPagina);
-  };
+  const cambiarPagina = useCallback((numeroPagina) => {
+    const target = Number(numeroPagina);
+    if (!Number.isNaN(target)) {
+      const bounded = Math.min(Math.max(1, target), totalPaginas);
+      if (bounded !== paginaActual) setPaginaActual(bounded);
+    }
+  }, [totalPaginas, paginaActual]);
 
-  const limpiarFiltros = () => {
-    // Función eliminada: no hay filtros de fecha
-  };
+  
 
   if (loading) {
     return <div className="loading">{effectiveMode === 'tallas' ? 'Cargando tallas...' : 'Cargando medidas...'}</div>;
@@ -368,7 +365,14 @@ const MedidasTable = ({ mode = 'medidas' }) => {
                 onChange={(e) => setBusqueda(e.target.value)}
               />
             </div>
-            <button onClick={() => setMostrarFormulario(true)} className="btn-agregar">
+            <button
+              onClick={() => {
+                setEditandoMedida(null);
+                setNuevaMedida({ nombre: '', abreviatura: '', descripcion: '', activo: true });
+                setMostrarFormulario(true);
+              }}
+              className="btn-agregar"
+            >
               {effectiveMode === 'tallas' ? '+ Agregar Talla' : '+ Agregar Medida'}
             </button>
             {/* Botón de "Agregar Tallas Comunes" eliminado */}
@@ -448,7 +452,9 @@ const MedidasTable = ({ mode = 'medidas' }) => {
                 onClick={editandoMedida ? actualizarMedida : agregarMedida} 
                 className="btn-guardar"
               >
-                Crear marca
+                {editandoMedida
+                  ? (effectiveMode === 'tallas' ? 'Actualizar Talla' : 'Actualizar Medida')
+                  : (effectiveMode === 'tallas' ? 'Agregar Talla' : 'Agregar Medida')}
               </button>
             </div>
           </Dialog.Content>
@@ -459,60 +465,47 @@ const MedidasTable = ({ mode = 'medidas' }) => {
       <Dialog.Root open={mostrarDetalles} onOpenChange={setMostrarDetalles}>
         <Dialog.Portal>
           <Dialog.Overlay className="dialog-overlay" />
-          <Dialog.Content className="dialog-content">
-            <Dialog.Title className="dialog-title">
+          <Dialog.Content className="dialog-content dialog-detalles">
+            <Dialog.Title className="modal-titulo-base">
               {effectiveMode === 'tallas' ? 'Detalles de la Talla' : 'Detalles de la Medida'}
             </Dialog.Title>
+            <Dialog.Close asChild>
+              <button className="dialog-close-unified" aria-label="Cerrar">&times;</button>
+            </Dialog.Close>
             
             {medidaSeleccionada && (
-              <div className="detalles-medida-container">
-                <div className="seccion-detalles">
-                  <h3 className="titulo-seccion">Información General</h3>
-                  <div className="detalles-contenido">
-                    <div className="columna-izquierda">
-                      <div className="detalle-grupo">
-                        <label>{effectiveMode === 'tallas' ? 'Talla:' : 'Nombre:'}</label>
-                        <span>{medidaSeleccionada.nombre}</span>
-                      </div>
-                      <div className="detalle-grupo">
-                        {effectiveMode !== 'tallas' && (
-                          <>
-                            <label>Abreviatura:</label>
-                            <span>{medidaSeleccionada.abreviatura || 'No especificada'}</span>
-                          </>
-                        )}
-                      </div>
-                      <div className="detalle-grupo">
-                        <label>Descripción:</label>
-                        <span>{medidaSeleccionada.descripcion || 'No especificada'}</span>
-                      </div>
+              <div className="seccion-detalles-base">
+                <h3 className="titulo-seccion-base">Información General</h3>
+                <div className="formulario-dos-columnas-base">
+                  <div className="detalle-grupo-base">
+                    <label>{effectiveMode === 'tallas' ? 'Talla:' : 'Nombre:'}</label>
+                    <span>{medidaSeleccionada.nombre}</span>
+                  </div>
+                  {effectiveMode !== 'tallas' && (
+                    <div className="detalle-grupo-base">
+                      <label>Abreviatura:</label>
+                      <span>{medidaSeleccionada.abreviatura || 'No especificada'}</span>
                     </div>
-                    <div className="columna-derecha">
-                      <div className="detalle-grupo">
-                        <label>Estado:</label>
-                        <span className={`estado-badge ${medidaSeleccionada.activo ? 'activo' : 'inactivo'}`}>
-                          {medidaSeleccionada.activo ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </div>
-                      <div className="detalle-grupo">
-                        <label>Fecha de Registro:</label>
-                        <span>{new Date(medidaSeleccionada.fechaRegistro).toLocaleDateString()}</span>
-                      </div>
-                    </div>
+                  )}
+                  <div className="detalle-grupo-base">
+                    <label>Descripción:</label>
+                    <span>{medidaSeleccionada.descripcion || 'No especificada'}</span>
+                  </div>
+                  <div className="detalle-grupo-base">
+                    <label>Estado:</label>
+                    <span className={`estado-badge ${medidaSeleccionada.activo ? 'activo' : 'inactivo'}`}>
+                      {medidaSeleccionada.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </div>
+                  <div className="detalle-grupo-base">
+                    <label>Fecha de Registro:</label>
+                    <span>{new Date(medidaSeleccionada.fechaRegistro).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="botones-formulario">
-              <button 
-                type="button" 
-                onClick={() => setMostrarDetalles(false)}
-                className="btn-cancelar"
-              >
-                Cerrar
-              </button>
-            </div>
+            
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

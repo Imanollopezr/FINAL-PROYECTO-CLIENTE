@@ -781,7 +781,7 @@ const comprasFiltradas = compras.filter((c) => {
                 <div className="detalles-contenido">
                   <div className="seccion-detalles-base">
                     <h3 className="titulo-seccion-base">Información General</h3>
-                    <div className="formulario-dos-columnas-base">
+                    <div className="formulario-vertical">
                       <div className="detalle-grupo-base">
                         <label>Fecha</label>
                         <input
@@ -817,7 +817,7 @@ const comprasFiltradas = compras.filter((c) => {
                   </div>
                   <div className="seccion-detalles-base">
                     <h3 className="titulo-seccion-base">Productos</h3>
-                    <div className="formulario-dos-columnas-base">
+                    <div className="formulario-vertical">
                       <div className="detalle-grupo-base">
                         <label>Producto</label>
                         <select

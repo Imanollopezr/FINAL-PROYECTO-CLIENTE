@@ -134,6 +134,24 @@
   width: 96vw;
 }
 
+.dialog-agregar-venta .detalles-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+.dialog-agregar-venta .seccion-detalles-base {
+  width: 100%;
+}
+.titulo-seccion-base {
+  margin: 0 0 0.6rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-left: 4px solid #FFC107;
+  padding-left: 0.5rem;
+  text-transform: uppercase;
+}
+
 .dialog-agregar-venta .formulario-dos-columnas {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -152,6 +170,13 @@
 }
 
 .dialog-agregar-venta .grupo-campo {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.8rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.dialog-agregar-venta .detalle-grupo-base {
   background: var(--input-bg);
   border: 1px solid var(--border);
   border-radius: 0.6rem;
@@ -672,4 +697,3 @@ body.dark-mode {
     transform: translateY(-1px);
   }
 }
-

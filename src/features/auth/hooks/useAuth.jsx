@@ -3,6 +3,7 @@ import { API_ENDPOINTS, DEFAULT_HEADERS, buildApiUrl } from '../../../constants/
 import authService from '../../../services/authService'
 import PermisosService from '../../../services/permisosService'
 import { setToken as setStoreToken, getToken as getStoreToken, clearToken as clearStoreToken } from '../tokenStore'
+import { normalizeRoleName } from '../../../shared/utils/roleRouting'
 
 // Contexto de autenticación
 const AuthContext = createContext(null)
@@ -79,7 +80,7 @@ export const AuthProvider = ({ children }) => {
           const profileData = await profileResponse.json().catch(() => ({}))
           if (profileData.exitoso && profileData.data) {
             const userInfo = profileData.data
-            const userRole = userInfo.nombreRol || userInfo.rol || 'Usuario'
+            const userRole = normalizeRoleName(userInfo.nombreRol || userInfo.rol || 'Usuario')
             setUser({
               id: userInfo.id.toString(),
               name: userInfo.nombres || 'Usuario',
@@ -142,7 +143,7 @@ export const AuthProvider = ({ children }) => {
           console.log('nombreRol:', userInfo.nombreRol);
           
           // El rol viene en nombreRol desde el backend
-          const userRole = userInfo.nombreRol || 'Usuario'
+          const userRole = normalizeRoleName(userInfo.nombreRol || 'Usuario')
           
           console.log('🎯 DEBUG - Rol final asignado:', userRole);
           

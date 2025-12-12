@@ -28,7 +28,7 @@ const ClientesTable = () => {
   const [busqueda, setBusqueda] = useState('');
   const [mostrarDetalles, setMostrarDetalles] = useState(false);
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
-  const [erroresCliente, setErroresCliente] = useState({ nombre: '', apellido: '', email: '' });
+  const [erroresCliente, setErroresCliente] = useState({ nombre: '', apellido: '', email: '', documento: '', telefono: '', codigoPostal: '' });
   const [deletingId, setDeletingId] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
   
@@ -68,35 +68,50 @@ const ClientesTable = () => {
   }, []);
 
   const validarCliente = (cliente) => {
-    const campos = ['nombre', 'apellido', 'email'];
+    const campos = ['nombre', 'apellido', 'email', 'documento', 'telefono', 'codigoPostal'];
     return campos.every((campo) => cliente[campo]?.trim() !== '');
   };
 
   // Validación de documento (opcional): solo números y longitud razonable
   const validarDocumento = (documento) => {
     const doc = (documento || '').trim();
-    if (doc === '') {
-      // Campo opcional: si no se ingresó, consideramos válido
-      return { valid: true };
-    }
     const soloDigitos = /^\d+$/;
-    if (!soloDigitos.test(doc)) {
-      return { valid: false, message: 'El documento debe contener solo números.' };
-    }
-    if (doc.length < 6 || doc.length > 15) {
-      return { valid: false, message: 'Longitud del documento inválida (6-15 dígitos).' };
-    }
+    if (!doc) return { valid: false, message: 'El documento debe contener 10 números.' };
+    if (!soloDigitos.test(doc)) return { valid: false, message: 'El documento debe contener solo números.' };
+    if (doc.length !== 10) return { valid: false, message: 'El documento debe tener exactamente 10 dígitos.' };
+    return { valid: true };
+  };
+
+  const validarTelefono = (telefono) => {
+    const tel = (telefono || '').trim();
+    const soloDigitos = /^\d+$/;
+    if (!tel) return { valid: false, message: 'El teléfono debe contener 10 números.' };
+    if (!soloDigitos.test(tel)) return { valid: false, message: 'El teléfono debe contener solo números.' };
+    if (tel.length !== 10) return { valid: false, message: 'El teléfono debe tener exactamente 10 dígitos.' };
+    return { valid: true };
+  };
+
+  const validarCodigoPostal = (codigo) => {
+    const cp = (codigo || '').trim();
+    const soloDigitos = /^\d+$/;
+    if (!cp) return { valid: false, message: 'El código postal debe contener 10 números.' };
+    if (!soloDigitos.test(cp)) return { valid: false, message: 'El código postal debe contener solo números.' };
+    if (cp.length !== 10) return { valid: false, message: 'El código postal debe tener exactamente 10 dígitos.' };
     return { valid: true };
   };
 
   // Manejador de cambio para campos del nuevo cliente, resetea verificación cuando cambia documento
   const manejarCambioNuevoCliente = (e) => {
     const { name, value } = e.target;
-    setNuevoCliente(prev => ({ ...prev, [name]: value }));
+    let val = value;
     if (name === 'documento') {
+      val = value.replace(/\D/g, '').slice(0, 10);
       setDocCheckStatus('unknown');
       setDocCheckMessage('');
+      const { valid, message } = validarDocumento(val);
+      setErroresCliente(prev => ({ ...prev, documento: valid ? '' : message }));
     }
+    setNuevoCliente(prev => ({ ...prev, [name]: val }));
   };
 
   // Auto-verificar documento al escribir (con pequeño debounce)
@@ -263,6 +278,26 @@ const ClientesTable = () => {
         showConfirmButton: false
       });
     }
+    const telVal = validarTelefono(nuevoCliente.telefono);
+    if (!telVal.valid) {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Teléfono inválido',
+        text: telVal.message,
+        timer: 2500,
+        showConfirmButton: false
+      });
+    }
+    const cpVal = validarCodigoPostal(nuevoCliente.codigoPostal);
+    if (!cpVal.valid) {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Código postal inválido',
+        text: cpVal.message,
+        timer: 2500,
+        showConfirmButton: false
+      });
+    }
 
     // Bloquear creación si el documento ya existe
     if (docCheckStatus === 'exists') {
@@ -358,6 +393,26 @@ const ClientesTable = () => {
         icon: 'warning',
         title: 'Documento inválido',
         text: docVal.message,
+        timer: 2500,
+        showConfirmButton: false
+      });
+    }
+    const telVal = validarTelefono(nuevoCliente.telefono);
+    if (!telVal.valid) {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Teléfono inválido',
+        text: telVal.message,
+        timer: 2500,
+        showConfirmButton: false
+      });
+    }
+    const cpVal = validarCodigoPostal(nuevoCliente.codigoPostal);
+    if (!cpVal.valid) {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Código postal inválido',
+        text: cpVal.message,
         timer: 2500,
         showConfirmButton: false
       });
@@ -643,9 +698,13 @@ const ClientesTable = () => {
                     name="documento"
                     value={nuevoCliente.documento}
                     onChange={manejarCambioNuevoCliente}
+                    maxLength={10}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder="Ingrese el documento"
                   />
                 </div>
+                {erroresCliente.documento && (<span className="error-mensaje">{erroresCliente.documento}</span>)}
                 {docCheckStatus !== 'unknown' && (
                   <div className="doc-indicator-wrapper">
                     <span className={`doc-indicator ${docCheckStatus === 'exists' ? 'existe' : docCheckStatus === 'available' ? 'disponible' : 'error'}`}>
@@ -708,9 +767,18 @@ const ClientesTable = () => {
                 <input
                   type="text"
                   value={nuevoCliente.telefono}
-                  onChange={e => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
+                  onChange={e => {
+                    const v = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setNuevoCliente({ ...nuevoCliente, telefono: v });
+                    const { valid, message } = validarTelefono(v);
+                    setErroresCliente(prev => ({ ...prev, telefono: valid ? '' : message }));
+                  }}
+                  maxLength={10}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="Ingrese el teléfono"
                 />
+                {erroresCliente.telefono && (<span className="error-mensaje">{erroresCliente.telefono}</span>)}
               </div>
 
               <div className="grupo-campo">
@@ -738,9 +806,18 @@ const ClientesTable = () => {
                 <input
                   type="text"
                   value={nuevoCliente.codigoPostal}
-                  onChange={e => setNuevoCliente({ ...nuevoCliente, codigoPostal: e.target.value })}
+                  onChange={e => {
+                    const v = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setNuevoCliente({ ...nuevoCliente, codigoPostal: v });
+                    const { valid, message } = validarCodigoPostal(v);
+                    setErroresCliente(prev => ({ ...prev, codigoPostal: valid ? '' : message }));
+                  }}
+                  maxLength={10}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="Ingrese el código postal"
                 />
+                {erroresCliente.codigoPostal && (<span className="error-mensaje">{erroresCliente.codigoPostal}</span>)}
               </div>
 
               {/* Campo Estado eliminado en edición, se gestiona solo desde el botón externo en la tabla */}
@@ -858,13 +935,15 @@ const ClientesTable = () => {
       <Dialog.Root open={mostrarDetalles} onOpenChange={setMostrarDetalles}>
         <Dialog.Portal>
           <Dialog.Overlay className="dialog-overlay" />
-          <Dialog.Content className="dialog-content">
-            <button
-              className="btn-cerrar-x"
-              onClick={() => setMostrarDetalles(false)}
-            >
-              ×
-            </button>
+          <Dialog.Content className="dialog-content dialog-detalles">
+            <Dialog.Close asChild>
+              <button
+                className="btn-cerrar-x"
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </Dialog.Close>
 
             {clienteSeleccionado && (
               <>

@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Sidebar } from "../components";
 import Navbar from "../components/Navbar/Navbar"; // ✅ Ruta corregida
 import { useAuth } from "../features/auth/hooks/useAuth";
@@ -8,11 +8,12 @@ import "./Layout.css";
 const BaseLayout = () => {
   const { logout, user } = useAuth();
   const roleClass = getRoleThemeClass(user?.role);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     console.log("👋 Cerrar sesión clickeado");
     await logout();
-    window.location.href = "/";
+    navigate("/login", { replace: true });
   };
 
   return (

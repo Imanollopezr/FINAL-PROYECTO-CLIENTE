@@ -76,6 +76,7 @@ const ProveedoresTable = () => {
   const validarProveedorCampos = (p) => {
     const email = (p.correo || '').trim();
     const doc = (p.documento || '').trim();
+    const tel = (p.telefono || p.celular || '').trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (email && !emailRegex.test(email)) {
       return { valid: false, message: 'Correo electrónico inválido.' };
@@ -84,8 +85,14 @@ const ProveedoresTable = () => {
     if (doc && !digitsOnly.test(doc)) {
       return { valid: false, message: 'Documento/NIT debe ser numérico.' };
     }
-    if (doc && (doc.length < 6 || doc.length > 15)) {
-      return { valid: false, message: 'Longitud de documento/NIT inválida (6-15 dígitos).' };
+    if (tel && !digitsOnly.test(tel)) {
+      return { valid: false, message: 'Teléfono debe ser numérico.' };
+    }
+    if (doc && doc.length !== 10) {
+      return { valid: false, message: 'El documento debe tener exactamente 10 dígitos.' };
+    }
+    if (tel && tel.length !== 10) {
+      return { valid: false, message: 'El teléfono debe tener exactamente 10 dígitos.' };
     }
     return { valid: true };
   };
@@ -137,17 +144,17 @@ const ProveedoresTable = () => {
       const proveedorParaAPI = {
         tipoPersona: nuevoProveedor.tipoPersona || 'natural',
         nombre: nuevoProveedor.nombre || 'Sin nombre', // Campo requerido por el backend
-        documento: nuevoProveedor.documento || '00000000',
+        documento: String(nuevoProveedor.documento || '').replace(/\D/g, '').slice(0, 10) || '0000000000',
         email: nuevoProveedor.correo || `temp${Date.now()}@example.com`,
-        celular: nuevoProveedor.celular,
-        telefono: nuevoProveedor.telefono,
+        celular: String(nuevoProveedor.celular || '').replace(/\D/g, '').slice(0, 10),
+        telefono: String(nuevoProveedor.telefono || '').replace(/\D/g, '').slice(0, 10),
         direccion: nuevoProveedor.direccion,
         ciudad: nuevoProveedor.ciudad,
         nombres: nuevoProveedor.tipoPersona === 'natural' ? nuevoProveedor.nombre : null,
         apellidos: nuevoProveedor.tipoPersona === 'natural' ? nuevoProveedor.contacto : null,
         razonSocial: nuevoProveedor.tipoPersona === 'juridica' ? nuevoProveedor.nombre : null,
         representanteLegal: nuevoProveedor.tipoPersona === 'juridica' ? nuevoProveedor.contacto : null,
-        nit: nuevoProveedor.tipoPersona === 'juridica' ? nuevoProveedor.documento : null,
+        nit: nuevoProveedor.tipoPersona === 'juridica' ? (String(nuevoProveedor.documento || '').replace(/\D/g, '').slice(0, 10)) : null,
         tipoDocumentoIdTipoDocumento: nuevoProveedor.tipoDocumentoIdTipoDocumento || 1
       };
       
@@ -225,17 +232,17 @@ const ProveedoresTable = () => {
         id: editandoProveedor,
         tipoPersona: nuevoProveedor.tipoPersona || 'natural',
         nombre: nuevoProveedor.nombre || 'Sin nombre', // Campo requerido por el backend
-        documento: nuevoProveedor.documento || '00000000',
+        documento: String(nuevoProveedor.documento || '').replace(/\D/g, '').slice(0, 10) || '0000000000',
         email: nuevoProveedor.correo || `temp${Date.now()}@example.com`,
-        celular: nuevoProveedor.celular,
-        telefono: nuevoProveedor.telefono,
+        celular: String(nuevoProveedor.celular || '').replace(/\D/g, '').slice(0, 10),
+        telefono: String(nuevoProveedor.telefono || '').replace(/\D/g, '').slice(0, 10),
         direccion: nuevoProveedor.direccion,
         ciudad: nuevoProveedor.ciudad,
         nombres: nuevoProveedor.tipoPersona === 'natural' ? nuevoProveedor.nombre : null,
         apellidos: nuevoProveedor.tipoPersona === 'natural' ? nuevoProveedor.contacto : null,
         razonSocial: nuevoProveedor.tipoPersona === 'juridica' ? nuevoProveedor.nombre : null,
         representanteLegal: nuevoProveedor.tipoPersona === 'juridica' ? nuevoProveedor.contacto : null,
-        nit: nuevoProveedor.tipoPersona === 'juridica' ? nuevoProveedor.documento : null,
+        nit: nuevoProveedor.tipoPersona === 'juridica' ? (String(nuevoProveedor.documento || '').replace(/\D/g, '').slice(0, 10)) : null,
         tipoDocumentoIdTipoDocumento: nuevoProveedor.tipoDocumentoIdTipoDocumento || 1,
         activo: nuevoProveedor.activo !== false
       };
@@ -635,9 +642,15 @@ const ProveedoresTable = () => {
                   <div className="grupo-campo">
                     <label>Número de Documento:</label>
                     <input
-                      type="text"
+                      type="tel"
                       value={nuevoProveedor.documento}
-                      onChange={(e) => setNuevoProveedor({ ...nuevoProveedor, documento: e.target.value })}
+                      onChange={(e) => {
+                        const v = String(e.target.value || '').replace(/\D/g, '').slice(0, 10);
+                        setNuevoProveedor({ ...nuevoProveedor, documento: v });
+                      }}
+                      maxLength={10}
+                      inputMode="numeric"
+                      pattern="\d{0,10}"
                       placeholder="Número de Documento"
                     />
                   </div>
@@ -665,9 +678,15 @@ const ProveedoresTable = () => {
                   <div className="grupo-campo">
                     <label>NIT:</label>
                     <input
-                      type="text"
+                      type="tel"
                       value={nuevoProveedor.documento}
-                      onChange={(e) => setNuevoProveedor({ ...nuevoProveedor, documento: e.target.value })}
+                      onChange={(e) => {
+                        const v = String(e.target.value || '').replace(/\D/g, '').slice(0, 10);
+                        setNuevoProveedor({ ...nuevoProveedor, documento: v });
+                      }}
+                      maxLength={10}
+                      inputMode="numeric"
+                      pattern="\d{0,10}"
                       placeholder="NIT"
                     />
                   </div>
@@ -679,9 +698,15 @@ const ProveedoresTable = () => {
                   <div className="grupo-campo">
                     <label>Teléfono:</label>
                     <input
-                      type="text"
+                      type="tel"
                       value={nuevoProveedor.telefono}
-                      onChange={(e) => setNuevoProveedor({ ...nuevoProveedor, telefono: e.target.value })}
+                      onChange={(e) => {
+                        const v = String(e.target.value || '').replace(/\D/g, '').slice(0, 10);
+                        setNuevoProveedor({ ...nuevoProveedor, telefono: v });
+                      }}
+                      maxLength={10}
+                      inputMode="numeric"
+                      pattern="\d{0,10}"
                       placeholder="Teléfono"
                     />
                   </div>

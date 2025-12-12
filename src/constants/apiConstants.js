@@ -166,17 +166,7 @@ export const API_ENDPOINTS = {
     PROCESAR_COMPRA: '/api/carrito/procesar-compra'
   },
   
-  // Pedidos
-  PEDIDOS: {
-    GET_ALL: '/api/pedidos',
-    CREATE: '/api/pedidos',
-    UPDATE: '/api/pedidos/:id',
-    DELETE: '/api/pedidos/:id',
-    GET_BY_ID: '/api/pedidos/:id',
-    CAMBIAR_ESTADO: '/api/pedidos/:id/estado',
-    HISTORIAL_ESTADOS: '/api/pedidos/:id/historial',
-    CONFIRMAR: '/api/pedidos/:id/confirmar'
-  },
+  
   
   // Autenticación
   AUTH: {

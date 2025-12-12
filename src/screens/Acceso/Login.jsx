@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
 import { useAuth } from '../../features/auth/hooks/useAuth';
-import { getDefaultRouteByUser, getDefaultRouteByRole } from '../../shared/utils/roleRouting';
-import authService from '../../services/authService';
+import { getDefaultRouteByUser } from '../../shared/utils/roleRouting';
 import './Login.scss';
 // import TestGoogleAuth from '../../components/TestGoogleAuth'; // Componente de prueba removido
 
@@ -15,7 +14,7 @@ const Login = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login, loginWithProvider } = useAuth();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,10 +37,11 @@ const Login = () => {
           title: '¡Bienvenido!',
           text: 'Has iniciado sesión correctamente',
           icon: 'success',
-          confirmButtonText: 'Continuar'
-        }).then(() => {
-          navigate(getDefaultRouteByUser());
+          showConfirmButton: false,
+          timer: 1200,
+          timerProgressBar: true
         });
+        navigate(getDefaultRouteByUser());
       } else {
         Swal.fire({
           title: 'Error',
@@ -63,67 +63,7 @@ const Login = () => {
     }
   };
 
-  const handleOAuthLogin = async (provider) => {
-    setIsLoading(true);
-    try {
-      // Guard: evitar intentar OAuth si Firebase no está configurado
-      if (!isFirebaseConfigured) {
-        Swal.fire({
-          title: 'Configuración de Firebase incompleta',
-          text: 'Para usar Google, completa las variables VITE_FIREBASE_* en tu archivo .env y reinicia npm run dev.',
-          icon: 'warning',
-          confirmButtonText: 'Entendido'
-        });
-        return;
-      }
-      const result = await loginWithProvider(provider);
-      if (result.success) {
-        Swal.fire({
-          title: '¡Bienvenido!',
-          text: 'Has iniciado sesión correctamente',
-          icon: 'success',
-          confirmButtonText: 'Continuar'
-        }).then(() => {
-          navigate(getDefaultRouteByUser());
-        });
-      } else {
-        Swal.fire({
-          title: 'Error de autenticación',
-          text: result.error || 'No se pudo iniciar sesión con el proveedor',
-          icon: 'error',
-          confirmButtonText: 'Intentar de nuevo'
-        });
-      }
-    } catch (error) {
-      console.error('Error en OAuth login:', error);
-      Swal.fire({
-        title: 'Error inesperado',
-        text: 'Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.',
-        icon: 'error',
-        confirmButtonText: 'Intentar de nuevo'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  const handleLogout = async () => {
-    try {
-      const { signOut } = await import('../../lib/firebase');
-      const result = await signOut();
-      
-      if (result.success) {
-        Swal.fire({
-          title: 'Sesión cerrada',
-          text: 'Has cerrado sesión exitosamente. Ahora puedes iniciar sesión con otra cuenta.',
-          icon: 'success',
-          confirmButtonText: 'Entendido'
-        });
-      }
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
-  }
+  
 
   return (
     <div className="login-background">

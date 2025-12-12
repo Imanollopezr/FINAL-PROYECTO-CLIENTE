@@ -105,6 +105,17 @@ namespace PetLove.API.Controllers
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(medidaDto.Nombre) || medidaDto.Nombre.Trim().Length < 2)
+                {
+                    return BadRequest(new { message = "El nombre de la medida es requerido y debe tener al menos 2 caracteres" });
+                }
+                var nombreNormalizado = medidaDto.Nombre.Trim().ToLower();
+                var existeNombre = await _context.Medidas.AnyAsync(m =>
+                    m.Nombre.ToLower() == nombreNormalizado);
+                if (existeNombre)
+                {
+                    return BadRequest(new { message = "Ya existe una medida con este nombre" });
+                }
                 var medida = new Medida
                 {
                     Nombre = medidaDto.Nombre,

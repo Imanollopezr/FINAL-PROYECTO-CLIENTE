@@ -6,17 +6,19 @@ import CarritoCompras from '../../components/Carrito/CarritoCompras';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import productosService from '../../services/productosService';
 import imageApiService from '../../services/imageApiService';
+import Swal from 'sweetalert2';
 // Eliminadas dependencias de backend del carrito
 import OptimizedImage from '../../components/common/OptimizedImage';
 import { API_BASE_URL } from '../../constants/apiConstants';
 import { formatPriceCL } from '../../Utils/priceUtils';
 import './ProductosLanding.scss';
 import './ClientesLanding-animations.scss';
+import logoImg from '../../assets/images/Huella_Petlove.png';
 
 const ProductosLanding = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, user, token, logout, permisos } = useAuth();
+  const { isAuthenticated, user, logout, permisos } = useAuth();
   const [busqueda, setBusqueda] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('Todos');
   const [filtroPrecio, setFiltroPrecio] = useState('Todos');
@@ -26,12 +28,59 @@ const ProductosLanding = () => {
   const [notificacion, setNotificacion] = useState({ visible: false, mensaje: '', producto: null });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [galeriaModal, setGaleriaModal] = useState({ open: false, imagenes: [], producto: null });
-  const [currentIndex, setCurrentIndex] = useState(0);
   
   // Estados para imágenes de Unsplash
-  const [heroImages, setHeroImages] = useState([]);
   const [productImages, setProductImages] = useState([]);
   const [loadingImages, setLoadingImages] = useState(true);
+  useEffect(() => {
+    try {
+      const s1 = localStorage.getItem('pl.busqueda');
+      if (s1 !== null) setBusqueda(s1);
+      const s2 = localStorage.getItem('pl.filtroCategoria');
+      if (s2 !== null) setFiltroCategoria(s2);
+      const s3 = localStorage.getItem('pl.filtroPrecio');
+      if (s3 !== null) setFiltroPrecio(s3);
+      const s4 = localStorage.getItem('pl.precioPersonalizado');
+      if (s4 !== null) setPrecioPersonalizado(s4);
+      const s5 = localStorage.getItem('pl.carrito');
+      if (s5) {
+        const parsed = JSON.parse(s5);
+        if (Array.isArray(parsed)) setCarrito(parsed);
+      }
+      const s6 = localStorage.getItem('pl.carritoAbierto');
+      if (s6 !== null) setCarritoAbierto(s6 === 'true');
+    } catch {}
+  }, []);
+  useEffect(() => {
+    try {
+      localStorage.setItem('pl.busqueda', busqueda);
+    } catch {}
+  }, [busqueda]);
+  useEffect(() => {
+    try {
+      localStorage.setItem('pl.filtroCategoria', filtroCategoria);
+    } catch {}
+  }, [filtroCategoria]);
+  useEffect(() => {
+    try {
+      localStorage.setItem('pl.filtroPrecio', filtroPrecio);
+    } catch {}
+  }, [filtroPrecio]);
+  useEffect(() => {
+    try {
+      localStorage.setItem('pl.precioPersonalizado', precioPersonalizado);
+    } catch {}
+  }, [precioPersonalizado]);
+  useEffect(() => {
+    try {
+      localStorage.setItem('pl.carrito', JSON.stringify(carrito));
+    } catch {}
+  }, [carrito]);
+  useEffect(() => {
+    try {
+      localStorage.setItem('pl.carritoAbierto', String(carritoAbierto));
+    } catch {}
+  }, [carritoAbierto]);
 
   // Catálogo desde backend
   const [productos, setProductos] = useState([]);
@@ -99,23 +148,9 @@ const ProductosLanding = () => {
     { value: '200000+', label: 'Más de $200.000' }
   ];
 
-  const navegarAInicio = () => {
-    navigate('/');
-  };
-
-  const navegarALogin = () => {
-    navigate('/login');
-  };
-
-
-
   const cerrarSesion = async () => {
     await logout();
     navigate('/');
-  };
-
-  const navegarAProductos = () => {
-    scrollToSection('productos');
   };
 
   const volverAModulos = () => {
@@ -183,6 +218,31 @@ const ProductosLanding = () => {
       setNotificacion({ visible: false, mensaje: '', producto: null });
     }, 3000);
   };
+  const verDescripcionRapida = (producto) => {
+    const nombre = producto?.nombre || 'Producto';
+    const descripcion = (producto?.descripcion || '').toString().trim() || 'Sin descripción';
+    const precio = formatPriceCL(producto?.precioNumerico || producto?.precio || 0);
+    const categoria = producto?.categoria || '—';
+    const stock = Number(producto?.stock ?? 0);
+    const estado = (!producto?.activo) ? 'Inactivo' : (stock <= 0) ? 'Sin stock' : 'Disponible';
+    const html = `
+      <div style="text-align:left;line-height:1.6">
+        <div style="font-weight:700;margin-bottom:.5rem;color:#1f2937">${nombre}</div>
+        <div style="margin-bottom:1rem;color:#334155">${descripcion}</div>
+        <div style="display:flex;gap:1rem;margin-bottom:.5rem;">
+          <div><span style="font-weight:600;color:#1f2937">Precio:</span> ${precio}</div>
+          <div><span style="font-weight:600;color:#1f2937">Categoría:</span> ${categoria}</div>
+        </div>
+        <div><span style="font-weight:600;color:#1f2937">Estado:</span> ${estado} <span style="color:#6b7280">(stock ${stock})</span></div>
+      </div>
+    `;
+    Swal.fire({
+      icon: 'info',
+      title: 'Vista rápida',
+      html,
+      confirmButtonText: 'Cerrar'
+    });
+  };
 
   // Abrir carrito mediante hash o query param
   useEffect(() => {
@@ -202,34 +262,11 @@ const ProductosLanding = () => {
     }
   }, [location.search]);
 
-  const eliminarDelCarrito = (productoId) => {
-    setCarrito(carrito.filter(item => item.id !== productoId));
-  };
-
-  const actualizarCantidadCarrito = (productoId, nuevaCantidad) => {
-    if (nuevaCantidad <= 0) {
-      eliminarDelCarrito(productoId);
-      return;
-    }
-
-    const producto = productos.find(p => p.id === productoId);
-    if (producto && nuevaCantidad > producto.stock) {
-      mostrarNotificacion(`Solo hay ${producto.stock} unidades disponibles`, producto);
-      return;
-    }
-
-    setCarrito(carrito.map(item =>
-      item.id === productoId
-        ? { ...item, cantidad: nuevaCantidad }
-        : item
-    ));
-  };
-
   const filtrarProductos = () => {
     return productos.filter(producto => {
       const cumpleBusqueda = producto.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
                             producto.descripcion.toLowerCase().includes(busqueda.toLowerCase());
-      
+     
       const cumpleCategoria = filtroCategoria === 'Todos' || producto.categoria === filtroCategoria;
       
       let cumplePrecio = true;
@@ -273,21 +310,12 @@ const ProductosLanding = () => {
     }
   };
 
-  const navegarAContacto = () => {
-    scrollToSection('contacto');
-  };
-
   // Función para obtener imagen específica por producto
   const getProductImage = (producto, index) => {
     // Priorizar imagenUrl del producto si existe
     const rawUrl = producto?.imagenUrl;
     if (rawUrl) {
-      // Si es relativa, construir absoluta con API_BASE_URL
-      const isAbsolute = /^https?:\/\//i.test(rawUrl);
-      // En desarrollo, asegurar que /uploads vaya al backend real
-      const devBase = (import.meta.env?.VITE_API_URL || import.meta.env?.VITE_API_BASE_URL || 'http://localhost:8090').replace(/\/$/, '');
-      const base = import.meta.env?.DEV ? devBase : API_BASE_URL;
-      const url = isAbsolute ? rawUrl : `${base}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`;
+      const url = buildImageSrc(rawUrl);
       return {
         id: `product-${producto.id}`,
         url,
@@ -328,14 +356,6 @@ const ProductosLanding = () => {
   const loadApiImages = async () => {
     try {
       setLoadingImages(true);
-      const hero = await imageApiService.getCarouselImages(6);
-      const heroImagesData = (hero || []).map((img, index) => ({
-        id: `hero-${index}`,
-        url: img.url,
-        thumbnail: img.thumbnail || img.url,
-      }));
-      setHeroImages(heroImagesData);
-
       let fetched = await imageApiService.getImages('unsplash', { count: 24, query: 'cute pet OR dog OR cat', width: 800, height: 600 });
       if (!Array.isArray(fetched) || fetched.length < 24) {
         const extra = await imageApiService.getImages('pets', { count: 24 });
@@ -434,7 +454,7 @@ const ProductosLanding = () => {
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <span className="logo-icon">🐾</span>
+            <img src={logoImg} alt="Pet Love" className="logo-img" />
             <span className="logo-text">Pet Love</span>
             <div className="logo-glow"></div>
           </div>
@@ -452,23 +472,27 @@ const ProductosLanding = () => {
               <span>Nosotros</span>
               <div className="nav-indicator"></div>
             </a>
-            {/* Productos oculto */}
-            <a href="/" onClick={(e) => { e.preventDefault(); const path = '/'; if (location.pathname !== path) navigate(path); }}>
-              <span>Comunidad</span>
-              <div className="nav-indicator"></div>
-            </a>
             <a href="/blog" onClick={(e) => { e.preventDefault(); const path = '/blog'; if (!location.pathname.startsWith(path)) navigate(path); }}>
               <span>Blog</span>
               <div className="nav-indicator"></div>
             </a>
           </nav>
           <div className="header-actions">
-            <button className="icon-button" onClick={navegarALogin} aria-label="Cuenta">
+            <button
+              className="icon-button decorativo"
+              aria-label="Cuenta"
+              title="Cuenta"
+            >
               <FaUser size={18} />
             </button>
             {isAuthenticated && (
               <button className="btn-outline volver-modulos-btn" onClick={volverAModulos} title="Volver a Módulos">
                 Volver a Módulos
+              </button>
+            )}
+            {isAuthenticated && (
+              <button className="btn-secondary cerrar-sesion-btn" onClick={cerrarSesion} title="Cerrar sesión">
+                Cerrar sesión
               </button>
             )}
             <button 
@@ -644,7 +668,6 @@ const ProductosLanding = () => {
                       }
 
                       setGaleriaModal({ open: true, imagenes, producto });
-                      setCurrentIndex(0);
                     } catch (e) {
                       console.warn('No se pudo abrir la galería del producto:', e);
                     }
@@ -678,7 +701,7 @@ const ProductosLanding = () => {
                     {/* Badge de stock eliminado: el stock se mostrará junto a "Disponible" en la info */}
 
                     <div className="producto-acciones-rapidas">
-                      <button className="accion-vista-rapida" title="Vista rápida">
+                      <button className="accion-vista-rapida" title="Vista rápida" aria-label="Vista rápida" onClick={() => verDescripcionRapida(producto)}>
                         👁️
                       </button>
                     </div>
@@ -810,21 +833,20 @@ const ProductosLanding = () => {
             </div>
             <div className="galeria-body">
               <div className="galeria-viewer">
-                <button className="galeria-prev" aria-label="Anterior" onClick={() => setCurrentIndex((i) => (i - 1 + galeriaModal.imagenes.length) % galeriaModal.imagenes.length)}>‹</button>
-                <img src={galeriaModal.imagenes[currentIndex]} alt={`Imagen ${currentIndex + 1}`} className="galeria-main-image" />
-                <button className="galeria-next" aria-label="Siguiente" onClick={() => setCurrentIndex((i) => (i + 1) % galeriaModal.imagenes.length)}>›</button>
-              </div>
-              <div className="galeria-thumbs">
-                {galeriaModal.imagenes.map((src, idx) => (
-                  <button key={`thumb-${idx}`} className={`thumb ${idx === currentIndex ? 'active' : ''}`} onClick={() => setCurrentIndex(idx)}>
-                    <img src={src} alt={`Miniatura ${idx + 1}`} />
-                  </button>
-                ))}
+                <img
+                  src={
+                    galeriaModal.producto?.imagenUrl
+                      ? buildImageSrc(galeriaModal.producto.imagenUrl)
+                      : (galeriaModal.imagenes?.[0] || '')
+                  }
+                  alt={galeriaModal.producto?.nombre || 'Imagen del producto'}
+                  className="galeria-main-image"
+                />
               </div>
               <div className="galeria-info">
                 <div className="info-precio">
                   <span className="label">Precio</span>
-                  <span className="valor">{formatPriceCL(galeriaModal.producto?.precio)}</span>
+                  <span className="valor">{galeriaModal.producto?.precio}</span>
                 </div>
                 <div className="info-categoria">
                   <span className="label">Categoría</span>
@@ -861,7 +883,7 @@ export default ProductosLanding;
     if (/^https?:\/\//i.test(url)) return url;
     const path = url.startsWith('/') ? url : `/${url}`;
     const base = import.meta.env?.DEV
-      ? (import.meta.env?.VITE_API_URL || import.meta.env?.VITE_API_BASE_URL || 'http://localhost:8090').replace(/\/$/, '')
+      ? (import.meta.env?.VITE_API_URL || import.meta.env?.VITE_API_BASE_URL || 'http://localhost:8091').replace(/\/$/, '')
       : API_BASE_URL;
     return `${base}${path}`;
   };

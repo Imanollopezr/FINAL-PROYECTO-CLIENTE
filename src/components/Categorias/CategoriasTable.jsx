@@ -11,7 +11,6 @@ import { useCancelableFetch } from "../../shared/hooks/useCancelableFetch";
 
 const CategoriasTable = ({ mode = 'categorias' }) => {
   const [categorias, setCategorias] = useState([]);
-  const [productos, setProductos] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [nuevaCategoria, setNuevaCategoria] = useState({ nombre: '', descripcion: '' });
   const [editando, setEditando] = useState(null);
@@ -35,7 +34,7 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
     setLoading(true);
     try {
       const endpoint = mode === 'colores'
-        ? API_ENDPOINTS.COLORES.GET_ALL
+        ? `${API_ENDPOINTS.COLORES.GET_ALL}?includeInactive=true`
         : API_ENDPOINTS.CATEGORIAS.GET_ALL;
       const response = await request(buildApiUrl(endpoint), {
         method: 'GET',
@@ -43,7 +42,18 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
       });
       if (response.ok) {
         const data = await response.json();
-        setCategorias(Array.isArray(data) ? data : []);
+        if (mode === 'colores') {
+          const list = (Array.isArray(data) ? data : []).map((d) => ({
+            idColor: d?.idColor ?? d?.IdColor ?? d?.id,
+            nombre: d?.nombre ?? d?.Nombre ?? '',
+            descripcion: d?.codigo ?? d?.Codigo ?? d?.descripcion ?? '',
+            activo: (d?.activo ?? d?.Activo) !== false,
+            fechaRegistro: d?.fechaRegistro ?? d?.FechaRegistro
+          }));
+          setCategorias(list);
+        } else {
+          setCategorias(Array.isArray(data) ? data : []);
+        }
       } else {
         throw new Error('Error al cargar categorías');
       }
@@ -64,9 +74,7 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
     }
   };
 
-  const guardarCategorias = (nuevas) => {
-    setCategorias(nuevas);
-  };
+  
 
 
   const esEntradaColor = (c) => {
@@ -143,10 +151,11 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
           method: 'PUT',
           headers,
           credentials: 'include',
-          body: JSON.stringify({
-            Nombre: nuevaCategoria.nombre,
-            Descripcion: nuevaCategoria.descripcion
-          })
+          body: JSON.stringify(
+            mode === 'colores'
+              ? { Nombre: nuevaCategoria.nombre, Codigo: nuevaCategoria.descripcion, Activo: editando.activo }
+              : { Nombre: nuevaCategoria.nombre, Descripcion: nuevaCategoria.descripcion }
+          )
         });
         
         if (response.ok) {
@@ -173,10 +182,11 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
           method: 'POST',
           headers,
           credentials: 'include',
-          body: JSON.stringify({
-            Nombre: nuevaCategoria.nombre,
-            Descripcion: nuevaCategoria.descripcion
-          })
+          body: JSON.stringify(
+            mode === 'colores'
+              ? { Nombre: nuevaCategoria.nombre, Codigo: nuevaCategoria.descripcion, Activo: true }
+              : { Nombre: nuevaCategoria.nombre, Descripcion: nuevaCategoria.descripcion }
+          )
         });
         
         if (response.ok) {
@@ -219,7 +229,7 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
       Swal.fire({
         icon: 'info',
         title: 'Categoría inactiva',
-        text: 'No puedes editar una categoría inactiva. Actívala para continuar.',
+        text: mode === 'colores' ? 'No puedes editar un color inactivo. Actívalo para continuar.' : 'No puedes editar una categoría inactiva. Actívala para continuar.',
         timer: 2000,
         showConfirmButton: false
       });
@@ -233,7 +243,7 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
   const eliminarCategoria = async (id) => {
     const result = await Swal.fire({
       title: '¿Estás seguro?',
-      text: 'Esta acción no se puede deshacer',
+      text: mode === 'colores' ? 'Esta acción no se puede deshacer. Si el color tiene productos activos asociados no podrá eliminarse.' : 'Esta acción no se puede deshacer',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -256,7 +266,7 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
         });
         
         if (response.ok) {
-          setCategorias(prev => (prev || []).filter(c => (c.idCategoriaProducto ?? c.id) !== id));
+          setCategorias(prev => (prev || []).filter(c => ((c.idCategoriaProducto ?? c.idColor ?? c.id) !== id)));
           Swal.fire({
             icon: 'success',
             title: 'Eliminado',
@@ -264,8 +274,18 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
             timer: 1800,
             showConfirmButton: false
           });
+        } else if (response.status === 409 && mode === 'colores') {
+          const errText = await response.text().catch(() => '');
+          Swal.fire({
+            icon: 'warning',
+            title: 'No se puede eliminar',
+            text: errText || 'No se puede eliminar: tiene productos activos asociados',
+            timer: 2800,
+            showConfirmButton: false
+          });
         } else {
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
+          const errText = await response.text().catch(() => '');
+          throw new Error(`Error ${response.status}: ${errText || response.statusText}`);
         }
       } catch (error) {
         console.error('Error al eliminar categoría:', error);
@@ -283,9 +303,19 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
   };
 
   const cambiarEstado = async (id, nuevoEstado) => {
+    const result = await Swal.fire({
+      title: nuevoEstado ? (mode === 'colores' ? '¿Activar color?' : '¿Activar categoría?') : (mode === 'colores' ? '¿Desactivar color?' : '¿Desactivar categoría?'),
+      text: nuevoEstado ? 'Se habilitará para su uso' : 'Se ocultará y no estará disponible',
+      icon: nuevoEstado ? 'question' : 'warning',
+      showCancelButton: true,
+      confirmButtonText: nuevoEstado ? 'Sí, activar' : 'Sí, desactivar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: nuevoEstado ? '#2d5a27' : '#d33',
+      cancelButtonColor: '#3085d6'
+    });
+    if (!result.isConfirmed) return;
     setLoading(true);
     try {
-      // Seleccionar endpoint según el modo
       const baseEstado = mode === 'colores' ? `/api/colores/${id}/estado` : `/api/categorias/${id}/estado`;
       const token = getStoreToken();
       const headers = token ? { ...DEFAULT_HEADERS, Authorization: `Bearer ${token}` } : { ...DEFAULT_HEADERS };
@@ -295,7 +325,6 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
         credentials: 'include',
         body: JSON.stringify({ activo: nuevoEstado })
       });
-      
       if (response.ok) {
         await cargarCategorias();
         Swal.fire({
@@ -387,6 +416,7 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
                       value={nuevaCategoria.descripcion}
                       onChange={e => setNuevaCategoria({ ...nuevaCategoria, descripcion: e.target.value })}
                       required
+                      disabled={editando && mode === 'colores'}
                     />
                   </div>
                   {mode === 'colores' && (
@@ -397,6 +427,7 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
                         type="color"
                         value={/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/.test(nuevaCategoria.descripcion) ? nuevaCategoria.descripcion : '#000000'}
                         onChange={(e) => setNuevaCategoria({ ...nuevaCategoria, descripcion: e.target.value })}
+                        disabled={editando && mode === 'colores'}
                       />
                     </div>
                   )}
@@ -432,31 +463,36 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
               </tr>
             ) : (
               categoriasActuales.map(c => (
-                <tr key={c.idCategoriaProducto} className={!c.activo ? 'fila-anulada' : ''}>
+                <tr key={(c.idCategoriaProducto ?? c.idColor ?? c.id ?? `${c.nombre}-${c.descripcion}`)} className={!c.activo ? 'fila-anulada' : ''}>
                   <td>{c.nombre}</td>
                   <td className={mode === 'colores' ? 'columna-codigo' : undefined}>
                     <span>{c.descripcion}</span>
                   </td>
-                  {mode === 'colores' && (
-                    <td className="columna-muestra">
-                      {isValidCssColor(c.descripcion) ? (
-                        <span style={{ display: 'inline-block', width: '16px', height: '16px', border: '1px solid #d1d5db', borderRadius: '4px', backgroundColor: c.descripcion }} />
-                      ) : (
-                        <span>—</span>
-                      )}
-                    </td>
+              {mode === 'colores' && (
+                <td className="columna-muestra">
+                  {isValidCssColor(c.descripcion) ? (
+                    <span style={{ display: 'inline-block', width: '16px', height: '16px', border: '1px solid #d1d5db', borderRadius: '4px', backgroundColor: c.descripcion }} />
+                  ) : (
+                    <span>—</span>
                   )}
-                  <td>
-                    <span
-                      className={`estado-badge ${c.activo ? 'activo' : 'inactivo'}`}
-                    >
-                      {c.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td className="acciones">
-                    <button onClick={() => {
-                      setModalDetalles(c);
-                    }} className="btn-icono btn-detalles" title="Ver Detalles" disabled={loading}>
+                </td>
+              )}
+              <td>
+                <button
+                  type="button"
+                  className={`estado-badge ${c.activo ? 'activo' : 'inactivo'}`}
+                  title={c.activo ? 'Clic para desactivar' : 'Clic para activar'}
+                  onClick={() => cambiarEstado((c.idCategoriaProducto ?? c.idColor ?? c.id), !c.activo)}
+                  disabled={loading}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {c.activo ? 'Activo' : 'Inactivo'}
+                </button>
+              </td>
+              <td className="acciones">
+                <button onClick={() => {
+                  setModalDetalles(c);
+                }} className="btn-icono btn-detalles" title="Ver Detalles" disabled={loading}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="#6b7280"/>
                       </svg>
@@ -466,7 +502,7 @@ const CategoriasTable = ({ mode = 'categorias' }) => {
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#000000"/>
                       </svg>
                     </button>
-                    <button onClick={() => eliminarCategoria(c.idCategoriaProducto)} className="btn-icono btn-eliminar" title="Eliminar" disabled={loading}>
+                    <button onClick={() => eliminarCategoria((c.idCategoriaProducto ?? c.idColor ?? c.id))} className="btn-icono btn-eliminar" title="Eliminar" disabled={loading}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#dc2626"/>
                       </svg>

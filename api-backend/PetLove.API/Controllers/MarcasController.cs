@@ -199,7 +199,7 @@ namespace PetLove.API.Controllers
             try
             {
                 var marca = await _context.Marcas.FindAsync(id);
-                if (marca == null || !marca.Activo)
+                if (marca == null)
                 {
                     return NotFound(new { message = "Marca no encontrada" });
                 }
@@ -210,11 +210,11 @@ namespace PetLove.API.Controllers
 
                 if (productosConMarca > 0)
                 {
-                    return BadRequest(new { message = $"No se puede eliminar la marca porque tiene {productosConMarca} productos asociados" });
+                    return BadRequest(new { message = "La marca está asociada a un producto." });
                 }
 
-                // Soft delete - marcar como inactivo en lugar de eliminar permanentemente
-                marca.Activo = false;
+                // Eliminación permanente
+                _context.Marcas.Remove(marca);
                 await _context.SaveChangesAsync();
 
                 return Ok(new { message = "Marca eliminada correctamente" });

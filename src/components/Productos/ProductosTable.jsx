@@ -21,7 +21,7 @@ const ProductosTable = () => {
   const [productos, setProductos] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [nuevo, setNuevo] = useState({
-    nombre: '', descripcion: '', precio: '', stock: '', categoria: '', marca: '', medida: '', imagenUrl: '', imagenFile: null, activo: true, gananciaPct: '', medidaKg: '', medidaGr: '', color: ''
+    nombre: '', descripcion: '', precio: '', stock: '0', categoria: '', marca: '', medida: '', imagenUrl: '', imagenFile: null, activo: true, gananciaPct: '', medidaKg: '', medidaGr: '', color: ''
   });
   const [editando, setEditando] = useState(false);
   const [categorias, setCategorias] = useState([]);
@@ -281,11 +281,63 @@ const ProductosTable = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        const activos = (data || []).filter(c => c.activo);
+        const normalizados = (Array.isArray(data) ? data : []).map((d) => ({
+          idColor: d?.idColor ?? d?.IdColor ?? d?.id,
+          nombre: d?.nombre ?? d?.Nombre ?? '',
+          // Usar código de color normalizado en 'descripcion' para reutilizar lógica existente
+          descripcion: d?.codigo ?? d?.Codigo ?? d?.descripcion ?? '',
+          activo: (d?.activo ?? d?.Activo) !== false
+        }));
+        const activos = normalizados.filter(c => c.activo);
         setColores(activos);
       }
     } catch {}
   };
+
+  // Helper para obtener ids robustamente
+  const getIdFrom = (obj, keys = []) => {
+    for (const k of keys) {
+      const v = obj?.[k];
+      if (v !== undefined && v !== null && String(v).trim() !== '') return String(v);
+    }
+    return '';
+  };
+
+  // Re-sincronizar selección al abrir edición cuando listas ya cargaron
+  useEffect(() => {
+    if (!editando) return;
+    const categoriaId =
+      getIdFrom(editando, ['idCategoriaProducto']) ||
+      getIdFrom(editando?.categoria, ['idCategoriaProducto', 'IdCategoriaProducto', 'id']);
+    const marcaId =
+      getIdFrom(editando, ['idMarcaProducto']) ||
+      getIdFrom(editando?.marca, ['idMarca', 'IdMarca', 'id']);
+    const medidaId =
+      getIdFrom(editando, ['idMedidaProducto']) ||
+      getIdFrom(editando?.medida, ['idMedida', 'IdMedida', 'id']);
+    const colorId = (() => {
+      const desc = String(editando.descripcion || '');
+      const m = desc.match(/Color:\s*([^•\(]+)\s*\(([^\)]+)\)/i);
+      if (m) {
+        const nombreColor = m[1].trim();
+        const codigo = m[2].trim();
+        let found = colores.find(c => String(c?.nombre || '').toLowerCase() === nombreColor.toLowerCase());
+        if (!found) {
+          found = colores.find(c => String(c?.descripcion || '').toLowerCase() === codigo.toLowerCase());
+        }
+        return found ? String(found.idColor ?? found.IdColor ?? found.id) : '';
+      }
+      return '';
+    })();
+
+    setNuevo(prev => ({
+      ...prev,
+      categoria: categoriaId,
+      marca: marcaId,
+      medida: medidaId,
+      color: colorId
+    }));
+  }, [editando, categorias, marcas, medidas, colores]);
 
 
 
@@ -372,11 +424,11 @@ const ProductosTable = () => {
 
     console.log('Validando campos:', { nombre, descripcion, precio, stock, categoria, marca, medida, imagenUrl, activo });
 
-    if (!nombre || !categoria || !marca || !medida || !precio || !stock) {
+    if (!nombre || !categoria || !marca || !medida || !precio) {
       showSwalSafe(null, {
         icon: 'warning',
         title: 'Campos incompletos',
-        text: 'Completa todos los campos requeridos: nombre, categoría, marca, medida, precio y stock.',
+        text: 'Completa todos los campos requeridos: nombre, categoría, marca, medida y precio.',
         showConfirmButton: false,
         timer: 2000,
         timerProgressBar: true
@@ -436,7 +488,6 @@ const ProductosTable = () => {
           nombre: nuevo.nombre,
           descripcion: descripcionFinal || '',
           precio: parsePriceCL(nuevo.precio),
-          stock: parseInt(nuevo.stock),
           idCategoriaProducto: parseInt(nuevo.categoria),
           idMarcaProducto: parseInt(nuevo.marca),
           idMedidaProducto: parseInt(nuevo.medida),
@@ -481,7 +532,7 @@ const ProductosTable = () => {
           nombre: nuevo.nombre,
           descripcion: descripcionFinal || '',
           precio: parsePriceCL(nuevo.precio),
-          stock: parseInt(nuevo.stock),
+          stock: 0,
           idCategoriaProducto: parseInt(nuevo.categoria),
           idMarcaProducto: parseInt(nuevo.marca),
           idMedidaProducto: parseInt(nuevo.medida),
@@ -502,7 +553,7 @@ const ProductosTable = () => {
           formData.append('Nombre', nuevo.nombre);
           formData.append('Descripcion', descripcionFinal || '');
           formData.append('Precio', parsePriceCL(nuevo.precio));
-          formData.append('Stock', parseInt(nuevo.stock));
+          formData.append('Stock', 0);
           formData.append('IdCategoriaProducto', parseInt(nuevo.categoria));
           formData.append('IdMarcaProducto', parseInt(nuevo.marca));
           formData.append('IdMedidaProducto', parseInt(nuevo.medida));
@@ -608,16 +659,20 @@ const ProductosTable = () => {
       descripcion: producto.descripcion || '',
       precio: producto.precio || '',
       stock: producto.stock || '',
-      categoria: producto.idCategoriaProducto || '',
-      marca: producto.idMarcaProducto || '',
-      medida: producto.idMedidaProducto || '',
+      categoria: String(producto.idCategoriaProducto ?? producto.categoria?.idCategoriaProducto ?? ''),
+      marca: String(producto.idMarcaProducto ?? producto.marca?.idMarca ?? ''),
+      medida: String(producto.idMedidaProducto ?? producto.medida?.idMedida ?? ''),
       color: (() => {
         const desc = String(producto.descripcion || '');
         const m = desc.match(/Color:\s*([^•\(]+)\s*\(([^\)]+)\)/i);
         if (m) {
           const nombreColor = m[1].trim();
-          const found = colores.find(c => String(c?.nombre || '').toLowerCase() === nombreColor.toLowerCase());
-          return found ? String(found.idCategoriaProducto) : '';
+          const codigo = m[2].trim();
+          let found = colores.find(c => String(c?.nombre || '').toLowerCase() === nombreColor.toLowerCase());
+          if (!found) {
+            found = colores.find(c => String(c?.descripcion || '').toLowerCase() === codigo.toLowerCase());
+          }
+          return found ? String(found.idColor ?? found.IdColor ?? found.id) : '';
         }
         return '';
       })(),
@@ -766,7 +821,7 @@ const ProductosTable = () => {
         partes.push(notaMedida);
       }
     }
-    const colorSel = colores?.find(c => String(c?.idCategoriaProducto) === String(colorId));
+    const colorSel = colores?.find(c => String(c?.idColor ?? c?.IdColor ?? c?.id) === String(colorId));
     if (colorSel && !colorMarcado) {
       const notaColor = `Color: ${colorSel.nombre}${colorSel.descripcion ? ` (${colorSel.descripcion})` : ''}`;
       partes.push(notaColor);
@@ -878,7 +933,7 @@ const ProductosTable = () => {
                   >
                     <option value="">Seleccione categoría</option>
                     {categorias.map((categoria) => (
-                      <option key={categoria.idCategoriaProducto} value={categoria.idCategoriaProducto}>
+                      <option key={categoria.idCategoriaProducto} value={String(categoria.idCategoriaProducto)}>
                         {categoria.nombre}
                       </option>
                     ))}
@@ -894,7 +949,7 @@ const ProductosTable = () => {
                   >
                     <option value="">Seleccione marca</option>
                     {marcas.map((marca) => (
-                      <option key={marca.idMarca} value={marca.idMarca}>
+                      <option key={marca.idMarca} value={String(marca.idMarca)}>
                         {marca.nombre}
                       </option>
                     ))}
@@ -918,7 +973,7 @@ const ProductosTable = () => {
                   >
                     <option value="">Seleccione medida</option>
                     {medidas.map((medida) => (
-                      <option key={medida.idMedida} value={medida.idMedida}>
+                      <option key={medida.idMedida} value={String(medida.idMedida)}>
                         {medida.nombre} ({medida.abreviatura})
                       </option>
                     ))}
@@ -936,7 +991,7 @@ const ProductosTable = () => {
                   >
                     <option value="">Seleccione color</option>
                     {colores.map((color) => (
-                      <option key={color.idCategoriaProducto} value={color.idCategoriaProducto}>
+                      <option key={(color.idColor ?? color.IdColor ?? color.id)} value={String(color.idColor ?? color.IdColor ?? color.id)}>
                         {color.nombre}
                       </option>
                     ))}
@@ -1014,16 +1069,7 @@ const ProductosTable = () => {
                   />
                 </div>
 
-                <div className="campo-moderno">
-                  <label>Stock <span className="requerido">*</span></label>
-                  <input
-                    type="number"
-                    value={nuevo.stock}
-                    onChange={e => setNuevo({ ...nuevo, stock: e.target.value })}
-                    placeholder="Cantidad en stock"
-                    className="input-moderno input-stock"
-                  />
-                </div>
+                {/* Campo de stock ocultado por requerimiento; el stock se inicializa en 0 al crear */}
 
                 <div className="campo-moderno">
                   <label>Imagen (archivo local)</label>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MdAdd, MdRemove, MdDelete, MdShoppingCart, MdClose, MdLogin } from 'react-icons/md';
+import { MdAdd, MdRemove, MdDelete, MdShoppingCart, MdClose } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { useAuth } from '../../features/auth/hooks/useAuth';
@@ -7,7 +7,6 @@ import carritoService from '../../services/carritoService';
 import pedidosService from '../../services/pedidosService';
 import productosService from '../../services/productosService';
 import clientesService from '../../services/clientesService';
-import ventasService from '../../services/ventasService';
 import './CarritoCompras.scss';
 
 const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
@@ -15,13 +14,7 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
   const { isAuthenticated, user, permisos } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // Datos de transferencia desde variables de entorno (configurables)
-  const accountName = import.meta.env.VITE_ACCOUNT_NAME || 'PetLove';
-  const nequiPhone = import.meta.env.VITE_NEQUI_PHONE || '';
-  const nequiQrUrl = import.meta.env.VITE_NEQUI_QR_URL || '';
-  const bancoAccount = import.meta.env.VITE_BANCOLOMBIA_ACCOUNT || '';
-  const bancoType = import.meta.env.VITE_BANCOLOMBIA_ACCOUNT_TYPE || 'Ahorros';
-  const bancoQrUrl = import.meta.env.VITE_BANCOLOMBIA_QR_URL || '';
+  
 
   useEffect(() => {
     // Sincronización con backend eliminada; solo estado local
@@ -34,6 +27,17 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
   const actualizarCantidad = async (productoId, nuevaCantidad) => {
     if (nuevaCantidad <= 0) {
       eliminarDelCarrito(productoId);
+      return;
+    }
+
+    const itemActual = carrito.find(i => i.id === productoId);
+    const stockDisponible = Number(itemActual?.stock ?? 0);
+    if (stockDisponible > 0 && nuevaCantidad > stockDisponible) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Stock insuficiente',
+        text: `Solo hay ${stockDisponible} unidades disponibles de "${itemActual?.nombre || 'este producto'}".`,
+      });
       return;
     }
 
@@ -215,9 +219,24 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
         .toString()
         .toLowerCase()
         .includes('admin');
-      const nombreDefault = isAdminUser ? '' : (user?.nombres ?? user?.name ?? user?.Nombre ?? '');
-      const apellidoDefault = isAdminUser ? '' : (user?.apellidos ?? user?.apellido ?? user?.Apellidos ?? user?.lastName ?? '');
-      const docDefault = isAdminUser ? '' : (user?.documento ?? user?.Documento ?? '');
+      // Derivar nombre y apellidos correctamente cuando solo hay nombre completo
+      const fullName = isAdminUser ? '' : (user?.name ?? user?.Nombre ?? '');
+      let nombreDefault = isAdminUser ? '' : (user?.nombres ?? '');
+      let apellidoDefault = isAdminUser ? '' : (user?.apellidos ?? user?.apellido ?? user?.Apellidos ?? user?.lastName ?? '');
+      if (!nombreDefault && !apellidoDefault && fullName) {
+        const parts = String(fullName).trim().split(/\s+/);
+        nombreDefault = parts[0] || '';
+        apellidoDefault = parts.slice(1).join(' ') || '';
+      }
+      // Si el campo "nombres" trae nombre completo y apellidos está vacío, separarlo
+      if (nombreDefault && !apellidoDefault) {
+        const parts = String(nombreDefault).trim().split(/\s+/);
+        if (parts.length > 1) {
+          nombreDefault = parts[0];
+          apellidoDefault = parts.slice(1).join(' ');
+        }
+      }
+      const docDefault = '';
       const telDefault = isAdminUser ? '' : (user?.telefono ?? user?.Telefono ?? '');
       const dirDefault = isAdminUser ? '' : (user?.direccion ?? user?.Direccion ?? '');
       const ciudadDefault = isAdminUser ? '' : (user?.ciudad ?? user?.Ciudad ?? '');
@@ -225,19 +244,19 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
         <div class="checkout-form">
           <div class="form-row">
             <label>Documento</label>
-            <input id="doc" type="text" placeholder="CC/NIT/Pasaporte" value="${docDefault}" maxlength="10" inputmode="numeric" />
+            <input id="doc" type="tel" placeholder="Documento (máx. 10 dígitos)" value="${docDefault}" maxlength="10" inputmode="numeric" />
           </div>
           <div class="form-row">
             <label>Nombre</label>
-            <input id="nombre" type="text" placeholder="Nombre" value="${nombreDefault}" ${nombreDefault ? 'readonly' : ''} pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\\s]+" title="Solo letras y espacios" />
+            <input id="nombre" type="text" placeholder="Nombre" value="${nombreDefault}" readonly />
           </div>
           <div class="form-row">
             <label>Apellidos</label>
-            <input id="apellido" type="text" placeholder="Apellidos" value="${apellidoDefault}" ${apellidoDefault ? 'readonly' : ''} pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\\s]+" title="Solo letras y espacios" />
+            <input id="apellido" type="text" placeholder="Apellidos" value="${apellidoDefault}" readonly />
           </div>
           <div class="form-row">
             <label>Teléfono</label>
-            <input id="tel" type="tel" placeholder="Ej: 3001234567" value="${telDefault}" maxlength="10" inputmode="numeric" />
+            <input id="tel" type="tel" placeholder="Celular (máx. 10 dígitos)" value="${telDefault}" maxlength="10" inputmode="numeric" />
           </div>
           <div class="form-row">
             <label>Dirección</label>
@@ -246,25 +265,6 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
           <div class="form-row">
             <label>Ciudad</label>
             <input id="ciudad" type="text" placeholder="Ciudad" value="${ciudadDefault}" />
-          </div>
-          <div class="form-row">
-            <label>Método de pago</label>
-            <select id="metodo">
-              <option value="Efectivo">Efectivo</option>
-              <option value="Transferencia">Transferencia</option>
-            </select>
-          </div>
-          <div class="form-row" id="row-transferencia" style="display:none;">
-            <label>Tipo de transferencia</label>
-            <select id="metodoTransferencia">
-              <option value="Nequi">Nequi</option>
-              <option value="Bancolombia">Bancolombia</option>
-            </select>
-          </div>
-          <div class="form-row" id="row-transferencia-detalles" style="display:none;">
-            <div id="transferenciaDetails" class="transferencia-details" style="font-size: 0.95rem; line-height: 1.4;">
-              <!-- Detalles de transferencia renderizados dinámicamente -->
-            </div>
           </div>
         </div>`;
 
@@ -276,42 +276,12 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
         confirmButtonText: 'Pagar',
         cancelButtonText: 'Cancelar',
         didOpen: () => {
-          const metodoSelect = document.getElementById('metodo');
-          const rowTransf = document.getElementById('row-transferencia');
-          const rowTransfDetalles = document.getElementById('row-transferencia-detalles');
-          const metodoTransfSelect = document.getElementById('metodoTransferencia');
-          const transfDetailsDiv = document.getElementById('transferenciaDetails');
           const docInput = document.getElementById('doc');
           const telInput = document.getElementById('tel');
           const nombreInput = document.getElementById('nombre');
           const apellidoInput = document.getElementById('apellido');
-
-          const getDetailsHtml = (tipo) => {
-            if (tipo === 'Nequi') {
-              const phone = nequiPhone ? `<div><strong>Número Nequi:</strong> ${nequiPhone}</div>` : '';
-              const name = accountName ? `<div><strong>Nombre:</strong> ${accountName}</div>` : '';
-              const qr = nequiQrUrl ? `<div style="margin-top:8px;"><img src="${nequiQrUrl}" alt="QR Nequi" style="max-width:160px;border:1px solid #eee;border-radius:8px;" /></div>` : '';
-              return `<div><strong>Transferencia vía Nequi</strong></div>${phone}${name}${qr}`;
-            }
-            // Bancolombia
-            const account = bancoAccount ? `<div><strong>Cuenta:</strong> ${bancoAccount}</div>` : '';
-            const type = bancoType ? `<div><strong>Tipo:</strong> ${bancoType}</div>` : '';
-            const name = accountName ? `<div><strong>Nombre:</strong> ${accountName}</div>` : '';
-            const qr = bancoQrUrl ? `<div style="margin-top:8px;"><img src="${bancoQrUrl}" alt="QR Bancolombia" style="max-width:160px;border:1px solid #eee;border-radius:8px;" /></div>` : '';
-            return `<div><strong>Transferencia vía Bancolombia</strong></div>${account}${type}${name}${qr}`;
-          };
-
-          const renderDetails = () => {
-            const tipo = metodoTransfSelect?.value || 'Nequi';
-            if (transfDetailsDiv) transfDetailsDiv.innerHTML = getDetailsHtml(tipo);
-          };
-
-          const toggleTransferencia = () => {
-            const show = metodoSelect?.value === 'Transferencia';
-            rowTransf.style.display = show ? 'block' : 'none';
-            rowTransfDetalles.style.display = show ? 'block' : 'none';
-            if (show) renderDetails();
-          };
+          if (nombreInput) nombreInput.readOnly = true;
+          if (apellidoInput) apellidoInput.readOnly = true;
 
           const enforceDigitsMax10 = (el) => {
             const v = (el?.value || '').replace(/\D/g, '').slice(0, 10);
@@ -365,13 +335,7 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
           apellidoInput?.addEventListener('input', () => {
             enforceLettersOnly(apellidoInput);
           });
-          docInput?.addEventListener('blur', () => {
-            lookupClientePorDocumento();
-          });
 
-          metodoSelect?.addEventListener('change', toggleTransferencia);
-          metodoTransfSelect?.addEventListener('change', renderDetails);
-          toggleTransferencia();
         },
         preConfirm: () => {
           const doc = document.getElementById('doc')?.value?.trim();
@@ -380,8 +344,6 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
           const tel = document.getElementById('tel')?.value?.trim();
           const dir = document.getElementById('dir')?.value?.trim();
           const ciudad = document.getElementById('ciudad')?.value?.trim();
-          const metodo = document.getElementById('metodo')?.value || 'Efectivo';
-          const metodoTransferencia = document.getElementById('metodoTransferencia')?.value || null;
           const docDigits = (doc || '').replace(/\D/g, '');
           const telDigits = (tel || '').replace(/\D/g, '');
           if (docDigits.length > 10) {
@@ -392,11 +354,12 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
             Swal.showValidationMessage('El teléfono debe tener máximo 10 dígitos');
             return;
           }
+          
           const nombreEl = document.getElementById('nombre');
           const apellidoEl = document.getElementById('apellido');
           const letrasRegex = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/;
           if (nombreEl?.readOnly || apellidoEl?.readOnly) {
-            return { doc: docDigits, nombre: nombreEl.value, apellido: apellidoEl.value, tel: telDigits, dir, ciudad, metodo, metodoTransferencia };
+            return { doc: docDigits, nombre: nombreEl.value, apellido: apellidoEl.value, tel: telDigits, dir, ciudad };
           }
           if (!nombre) {
             Swal.showValidationMessage('El nombre es obligatorio');
@@ -410,7 +373,7 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
             Swal.showValidationMessage('El apellido solo puede contener letras y espacios');
             return;
           }
-          return { doc: docDigits, nombre, apellido, tel: telDigits, dir, ciudad, metodo, metodoTransferencia };
+          return { doc: docDigits, nombre, apellido, tel: telDigits, dir, ciudad };
         }
       });
 
@@ -419,7 +382,7 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
         return;
       }
 
-      const { doc, nombre, apellido, tel, dir, ciudad, metodo, metodoTransferencia } = formResult.value;
+      const { doc, nombre, apellido, tel, dir, ciudad } = formResult.value;
 
       const datosCompra = {
         Nombres: nombre || null,
@@ -428,8 +391,6 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
         Telefono: tel || null,
         Direccion: dir || null,
         Ciudad: ciudad || null,
-        MetodoPago: metodo || 'Efectivo',
-        MetodoTransferencia: metodo === 'Transferencia' ? (metodoTransferencia || 'Nequi') : null,
         Observaciones: `Compra desde carrito web${nombre ? ' - ' + nombre : ''}${apellido ? ' ' + apellido : ''}`
       };
 
@@ -442,6 +403,7 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
           title: 'Pedido registrado',
           text: pedidoId ? `Tu pedido #${pedidoId} quedó en estado Pendiente.` : 'Tu pedido quedó en estado Pendiente.',
         });
+        localStorage.setItem('ultimoDocumentoCompra', String(doc || '').replace(/\D/g, ''));
         if (typeof setCarrito === 'function') {
           setCarrito([]);
         }
@@ -523,7 +485,7 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
                           <button 
                             className="btn-cantidad"
                             onClick={() => actualizarCantidad(item.id, item.cantidad + 1)}
-                            disabled={loading}
+                            disabled={loading || (Number(item.stock ?? 0) > 0 && item.cantidad >= Number(item.stock ?? 0))}
                           >
                             <MdAdd />
                           </button>

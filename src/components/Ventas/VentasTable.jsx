@@ -16,7 +16,7 @@ import usuariosService from '../../services/usuariosService';
 import clientesService from '../../services/clientesService';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { formatPriceCL } from '../../Utils/priceUtils';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 const showSwalSafe = (closeDialogFn, config) => {
   if (closeDialogFn) closeDialogFn(false);
   setTimeout(() => {
@@ -54,6 +54,7 @@ const computePriceWithTalla = (producto, talla) => {
 };
 const VentasTable = ({ filterByEstado = null, title = null }) => {
   const { user, isAuthenticated } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
   const [ventas, setVentas] = useState([]);
   const [stock, setStock] = useState({});
@@ -102,8 +103,10 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
   // Estados para paginación
   const [paginaActual, setPaginaActual] = useState(1);
   const [ventasPorPagina] = useState(5);
+  const roleNameLc = String(user?.role || user?.Rol || user?.nombreRol || '').toLowerCase();
+  const esAdmin = ['administrador','asistente'].includes(roleNameLc);
   const displayTitle = String(
-    title || (String(filterByEstado || '').toLowerCase() === 'pendiente' ? 'PEDIDOS' : 'VENTAS')
+    title || (String(filterByEstado || '').toLowerCase() === 'pendiente' ? 'PEDIDOS' : (esAdmin ? 'VENTAS' : 'MIS COMPRAS'))
   ).toUpperCase();
 
   // Función para cargar usuarios desde la API
@@ -241,13 +244,32 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
   const cargarVentas = async () => {
     try {
       if (filterByEstado && filterByEstado.toLowerCase() === 'pendiente') {
-        const pedidos = await pedidosService.obtenerPedidos();
+        let pedidos = [];
+        if (esAdmin) {
+          pedidos = await pedidosService.obtenerPedidos();
+        } else {
+          try {
+            pedidos = await clientesService.obtenerMisPedidos();
+          } catch {
+            try {
+              const todos = await pedidosService.obtenerPedidos();
+              const me = await clientesService.obtenerMiCliente();
+              const miId = Number(me?.id || me?.Id || 0);
+              pedidos = (Array.isArray(todos) ? todos : []).filter(x => {
+                const cid = Number(x?.cliente?.id || x?.clienteId || x?.ClienteId || 0);
+                return miId && cid === miId;
+              });
+            } catch {
+              pedidos = [];
+            }
+          }
+        }
         const pedidosFormateados = (Array.isArray(pedidos) ? pedidos : []).map(p => ({
           id: p.id || p.Id,
           fecha: p.fechaPedido ? new Date(p.fechaPedido).toISOString().split('T')[0] : (p.fechaCreacion ? new Date(p.fechaCreacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]),
           usuario: p.cliente?.nombres || p.cliente?.nombre || p.cliente?.Nombre || 'Cliente',
           total: p.total ?? p.Total ?? ((p.Subtotal || 0) + (p.Impuestos || 0) + (p.CostoEnvio || 0)),
-          estado: 'pendiente',
+          estado: p.estado || p.Estado || p.estadoPedido || p.EstadoPedido || 'Pendiente',
           productos: (p.detallesPedido || p.DetallesPedido || []).map(dp => ({
             id: dp.productoId || dp.ProductoId,
             nombre: dp.producto?.nombre || dp.Producto?.Nombre || 'Producto',
@@ -324,7 +346,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
   }, []);
   useEffect(() => {
     cargarVentas();
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, filterByEstado, location.key]);
   useEffect(() => {
     // Los usuarios se cargarán desde la API cuando sea necesario
   }, []);
@@ -567,23 +589,21 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
         timerProgressBar: true
       });
       return;
-    };
+    }
     
     const total = productosVenta.reduce((acc, p) => acc + (p.cantidad * p.precio), 0);
     
-    // Preparar datos para la API
+    // Preparar datos para la API (conforme al DTO del backend)
     const ventaData = {
+      clienteId: parseInt(usuarioId),
       fechaVenta: fecha,
-      usuarioId: parseInt(usuarioId),
-      total: total,
-      estado: 'activa',
-      documento: String(documento || '').trim() || undefined,
-      telefono: String(telefono || '').trim() || undefined,
-      ciudad: String(ciudad || '').trim() || undefined,
+      metodoPago: 'Efectivo',
+      estado: 'Completada',
+      observaciones: undefined,
       detallesVenta: productosVenta.map(producto => ({
         productoId: producto.id,
         cantidad: producto.cantidad,
-        precioUnitario: producto.precio
+        precioUnitario: Number(producto.precio)
       }))
     };
     
@@ -680,6 +700,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
         timer: 2000,
         timerProgressBar: true
       });
+      setAgregarOpen(false);
       
     } catch (error) {
       console.error('Error al crear venta:', error);
@@ -695,12 +716,13 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
     const t = (s || '').toLowerCase();
     if (t === 'activa' || t === 'completada') return 'Pagado';
     if (t === 'pendiente') return 'Pendiente';
-    if (t === 'anulada') return 'Anulada';
+    if (t === 'en proceso') return 'Pendiente';
+    if (t === 'anulada') return 'INHABILITADA';
     return t || 'Pagado';
   };
   const ventasFiltradas = ventas
     .filter(v =>
-      (v.usuario + ' ' + v.fecha + ' ' + v.productos.map(p => p.nombre).join(' '))
+      (v.usuario + ' ' + v.fecha + ' ' + (v.productos || []).map(p => p.nombre).join(' '))
         .toLowerCase()
         .includes(busqueda.toLowerCase())
     )
@@ -859,7 +881,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
     
     // Guardar PDF con nombre descriptivo
     const fechaFormateada = new Date(venta.fecha).toISOString().split('T')[0];
-    const clienteNombreFile = (clienteNombre || 'Cliente_General').replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+    const clienteNombreFile = (usuarioNombre || 'Cliente_General').replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
     doc.save(`Factura_Venta_${String(venta.id).padStart(6, '0')}_${clienteNombreFile}_${fechaFormateada}.pdf`);
     console.log('PDF generado exitosamente');
     } catch (error) {
@@ -963,8 +985,11 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
       setLoading(true);
       try {
         await pedidosService.confirmarPedido(id);
-        await cargarVentas();
-        navigate('/ventas');
+        setVentas(prev => prev.filter(v => Number(v.id) !== Number(id)));
+        setVerDetalleOpen(false);
+        setDetalleVenta(null);
+        setBusqueda('');
+        setPaginaActual(1);
         Swal.fire({
           icon: 'success',
           title: 'Pedido confirmado',
@@ -997,6 +1022,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
     });
 
     if (result.isConfirmed) {
+      setVentas(prev => prev.map(v => v.id === id ? { ...v, estado: 'anulada' } : v));
       setLoading(true);
       try {
         // Usar el nuevo método del servicio que maneja la recuperación de stock
@@ -1043,8 +1069,67 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
         }
       } finally {
         setLoading(false);
+        await cargarVentas();
+        await cargarProductos();
       }
     }
+  };
+
+  const handleClickEstado = async (venta) => {
+    if (!esAdmin) return;
+    const estadoLc = String(venta.estado || '').toLowerCase();
+    if (estadoLc === 'anulada') {
+      const r = await Swal.fire({
+        title: 'Reactivar venta',
+        text: '¿Deseas reactivar esta venta?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Reactivar',
+        cancelButtonText: 'Cancelar'
+      });
+      if (r.isConfirmed) {
+        setLoading(true);
+        try {
+          await ventasService.cambiarEstadoVenta(venta.id, { estado: 'Completada' });
+        } catch (err1) {
+          try {
+            await ventasService.actualizarVenta(venta.id, { estado: 'Completada' });
+          } catch {}
+        } finally {
+          setLoading(false);
+        }
+        setVentas(prev => prev.map(v => v.id === venta.id ? { ...v, estado: 'Completada' } : v));
+        await cargarVentas();
+        Swal.fire({ icon: 'success', title: 'Venta reactivada', timer: 1800, showConfirmButton: false });
+      }
+      return;
+    }
+    const r = await Swal.fire({
+      title: 'Cambiar estado',
+      icon: 'question',
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Pagado',
+      denyButtonText: 'Pendiente',
+      cancelButtonText: 'Cancelar'
+    });
+    let nuevoEstado = null;
+    if (r.isConfirmed) nuevoEstado = 'Completada';
+    else if (r.isDenied) nuevoEstado = 'Pendiente';
+    if (!nuevoEstado) return;
+    setLoading(true);
+    try {
+      await ventasService.cambiarEstadoVenta(venta.id, { estado: nuevoEstado });
+    } catch (err1) {
+      try {
+        await ventasService.actualizarVenta(venta.id, { estado: nuevoEstado });
+      } catch {}
+    } finally {
+      setLoading(false);
+    }
+    setVentas(prev => prev.map(v => v.id === venta.id ? { ...v, estado: nuevoEstado } : v));
+    await cargarVentas();
+    Swal.fire({ icon: 'success', title: 'Estado actualizado', timer: 1600, showConfirmButton: false });
   };
 
 
@@ -1063,8 +1148,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                 value={busqueda}
                 onChange={e => setBusqueda(e.target.value)}
               />
-              {/* Botón para abrir modal de Registro de Venta */}
-              {String(filterByEstado || '').toLowerCase() !== 'pendiente' && (
+              {String(filterByEstado || '').toLowerCase() !== 'pendiente' && esAdmin && (
                 <button
                   className="btn btn-agregar"
                   title="Agregar venta"
@@ -1077,7 +1161,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
           </div>
         </div>
 
-        {/* Modal de Registrar Venta */}
+        {esAdmin && (
         <Dialog.Root open={agregarOpen} onOpenChange={setAgregarOpen}>
           <Dialog.Portal>
             <Dialog.Overlay className="dialog-overlay" />
@@ -1090,7 +1174,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
               <div className="detalles-contenido">
                 <div className="formulario-unico">
                   <div className="formulario-grid-vertical">
-                    <div className="formulario-dos-columnas">
+                    <div className="formulario-grid-vertical">
                       <div className="grupo-campo">
                         <label>Fecha <span style={{ color: 'red' }}>*</span></label>
                         <input
@@ -1117,7 +1201,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                       </div>
                     </div>
 
-                    <div className="formulario-dos-columnas">
+                    <div className="formulario-grid-vertical">
                       <div className="grupo-campo">
                         <label>Producto <span style={{ color: 'red' }}>*</span></label>
                         <select
@@ -1148,7 +1232,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                       </div>
                     </div>
 
-                    <div className="formulario-dos-columnas">
+                    <div className="formulario-grid-vertical">
                       <div className="grupo-campo">
                         <label>Valor Unitario</label>
                         <input
@@ -1197,7 +1281,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                       </div>
                     </div>
 
-                    <div className="formulario-dos-columnas">
+                    <div className="formulario-grid-vertical">
                       <div className="grupo-campo">
                         <label>Color</label>
                         <select
@@ -1237,7 +1321,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                     </div>
 
                     {tempProducto.talla && (
-                      <div className="formulario-dos-columnas">
+                      <div className="formulario-grid-vertical">
                         <div className="grupo-campo" style={{ gridColumn: '1 / -1' }}>
                           <label>Precio por talla</label>
                           <input
@@ -1252,7 +1336,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                       </div>
                     )}
 
-                      <div className="formulario-dos-columnas">
+                      <div className="formulario-grid-vertical">
                         <div className="grupo-campo">
                           <label>Valor Total</label>
                           <input
@@ -1390,6 +1474,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
             </Dialog.Content>
           </Dialog.Portal>
         </Dialog.Root>
+        )}
 
         <div className="tabla-ventas-section">
           <div className="tabla-wrapper">
@@ -1412,7 +1497,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                       <td>{v.usuario}</td>
                       <td>
                         <ul className="lista-productos">
-                          {v.productos.map((p, i) => (
+                          {(v.productos || []).map((p, i) => (
                             <li key={`producto-lista-${v.id}-${p.id || i}`}>{p.nombre} (x{p.cantidad})</li>
                           ))}
                         </ul>
@@ -1420,16 +1505,33 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                       <td>{formatPriceCL(v.total)}</td>
                       <td>
                         {String(filterByEstado || '').toLowerCase() === 'pendiente' ? (
-                          <span
-                            className="estado-badge inactivo"
-                            title="Habilitar venta"
-                            onClick={() => confirmarPedido(v.id)}
-                            style={{ cursor: 'pointer' }}
-                          >
-                            Pendiente
-                          </span>
+                          esAdmin ? (
+                            <span
+                              className="estado-badge inactivo"
+                              title="Habilitar venta"
+                              onClick={() => confirmarPedido(v.id)}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              Pendiente
+                            </span>
+                          ) : (
+                            <span
+                              className="estado-badge inactivo"
+                              title="Pedido en proceso"
+                              style={{ cursor: 'default' }}
+                            >
+                              En Proceso
+                            </span>
+                          )
                         ) : (
-                          <span className="estado-badge activo">{normalizarEstado(v.estado)}</span>
+                          <span
+                            className={`estado-badge ${String(v.estado || '').toLowerCase() === 'anulada' ? 'inactivo' : 'activo'}`}
+                            onClick={() => esAdmin && handleClickEstado(v)}
+                            title={esAdmin ? (String(v.estado || '').toLowerCase() === 'anulada' ? 'Reactivar venta' : 'Cambiar estado') : ''}
+                            style={{ cursor: esAdmin ? 'pointer' : 'default' }}
+                          >
+                            {normalizarEstado(v.estado)}
+                          </span>
                         )}
                       </td>
                       <td>
@@ -1471,8 +1573,13 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                                     </div>
                                     <div className="detalle-grupo-base">
                                       <label>Estado:</label>
-                                      <span className={`estado-badge ${v.estado === 'anulada' ? 'inactivo' : 'activo'}`}>
-                                        {v.estado === 'anulada' ? 'Anulada' : 'Activa'}
+                                      <span
+                                        className={`estado-badge ${String(v.estado || '').toLowerCase() === 'anulada' ? 'inactivo' : 'activo'}`}
+                                        onClick={() => esAdmin && handleClickEstado(v)}
+                                        title={esAdmin ? (String(v.estado || '').toLowerCase() === 'anulada' ? 'Reactivar venta' : 'Cambiar estado') : ''}
+                                        style={{ cursor: esAdmin ? 'pointer' : 'default' }}
+                                      >
+                                        {normalizarEstado(v.estado)}
                                       </span>
                                     </div>
                                     <div className="detalle-grupo-base">
@@ -1490,24 +1597,24 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                                         <tr>
                                           <th>ID</th>
                                           <th>Producto</th>
-                                          <th>Color</th>
-                                          <th>Talla</th>
-                                          <th>Medida</th>
-                                          <th>Gramos</th>
+                                          {(v.productos || []).some(p => !!p.color) && <th>Color</th>}
+                                          {(v.productos || []).some(p => !!p.talla) && <th>Talla</th>}
+                                          {(v.productos || []).some(p => !!(p.medida?.abreviatura || p.medida?.nombre)) && <th>Medida</th>}
+                                          {(v.productos || []).some(p => !!p.gramos) && <th>Gramos</th>}
                                           <th>Cantidad</th>
                                           <th>Precio</th>
                                           <th>Subtotal</th>
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {v.productos.map((p, i) => (
+                                        {(v.productos || []).map((p, i) => (
                                           <tr key={`detalle-venta-${v.id}-${p.id || i}`}>
                                             <td>{p.id}</td>
                                             <td>{p.nombre}</td>
-                                            <td>{p.color || 'N/A'}</td>
-                                            <td>{p.talla || 'N/A'}</td>
-                                            <td>{p.medida?.abreviatura || p.medida?.nombre || 'N/A'}</td>
-                                            <td>{p.gramos || 'N/A'}</td>
+                                            {(v.productos || []).some(x => !!x.color) && <td>{p.color || ''}</td>}
+                                            {(v.productos || []).some(x => !!x.talla) && <td>{p.talla || ''}</td>}
+                                            {(v.productos || []).some(x => !!(x.medida?.abreviatura || x.medida?.nombre)) && <td>{p.medida?.abreviatura || p.medida?.nombre || ''}</td>}
+                                            {(v.productos || []).some(x => !!x.gramos) && <td>{p.gramos || ''}</td>}
                                             <td>{p.cantidad}</td>
                                             <td>{formatPriceCL(Number(p.precioTalla ?? p.precio ?? 0))}</td>
                                             <td>{formatPriceCL((p.esConcentrado && Number(p.gramos || 0) > 0)
@@ -1524,18 +1631,22 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                               </Dialog.Content>
                           </Dialog.Portal>
                         </Dialog.Root>
-                          <button className="btn btn-icon btn-pdf" onClick={() => generarPDF(v)} title="Generar PDF">
-                            <MdPictureAsPdf size={12} />
-                          </button>
-                          {v.estado !== 'anulada' && v.estado !== 'Anulada' && (
-                          <button 
-                              className="btn-icono btn-anular" 
-                              onClick={() => anularVenta(v.id)} 
-                              title="Anular Venta"
-                              disabled={loading}
-                            >
-                              <MdClose size={14} />
-                            </button>
+                          {!(String(filterByEstado || '').toLowerCase() === 'pendiente' && !esAdmin) && (
+                            <>
+                              <button className="btn btn-icon btn-pdf" onClick={() => generarPDF(v)} title="Generar PDF">
+                                <MdPictureAsPdf size={12} />
+                              </button>
+                              {esAdmin && v.estado !== 'anulada' && v.estado !== 'Anulada' && (
+                                <button 
+                                  className="btn-icono btn-anular" 
+                                  onClick={() => anularVenta(v.id)} 
+                                  title="Anular Venta"
+                                  disabled={loading}
+                                >
+                                  <MdClose size={14} />
+                                </button>
+                              )}
+                            </>
                           )}
                         </div>
                       </td>

@@ -66,7 +66,7 @@ const VerificarCodigo = () => {
         try {
           localStorage.setItem('resetEmail', userEmail);
           localStorage.setItem('resetCode', code);
-        } catch {}
+        } catch (err) { void err; }
         // Navegar a RestablecerContrasena con el email y código
         navigate('/RestablecerContrasena', { 
           state: { 

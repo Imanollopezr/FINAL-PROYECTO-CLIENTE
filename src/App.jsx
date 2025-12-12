@@ -108,7 +108,7 @@ function App() {
         {/* Rutas protegidas - Acceso general para usuarios autenticados */}
         <Route element={<PrivateRoute />}> 
           <Route element={<BaseLayout />}> 
-            <Route element={<RoleBasedRoute requiredPermisos={["VerDashboard"]} redirectTo="/mi-cuenta" />}> 
+            <Route element={<RoleBasedRoute allowedRoles={["Administrador","Asistente"]} requiredPermisos={["VerDashboard"]} redirectTo="/mi-cuenta" />}> 
               <Route path="/dashboard" element={<Dashboard />} /> 
             </Route>
             <Route path="/mi-cuenta" element={<MiCuenta />} /> 

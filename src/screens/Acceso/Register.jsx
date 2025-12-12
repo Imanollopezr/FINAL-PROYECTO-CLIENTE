@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import Swal from 'sweetalert2';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import authService from '../../services/authService.js';
-import { getDefaultRouteByRole } from '../../shared/utils/roleRouting';
 import './Register.scss';
 import { v4 as uuidv4 } from 'uuid';
 

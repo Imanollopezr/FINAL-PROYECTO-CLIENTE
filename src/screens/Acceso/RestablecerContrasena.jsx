@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from 'framer-motion';
 import Swal from "sweetalert2";
 import "./RestablecerContrasena.scss";
-import { useAuth } from '../../features/auth/hooks/useAuth';
 import authService from '../../shared/services/authService';
 
 const RestablecerContrasena = () => {
@@ -11,10 +10,7 @@ const RestablecerContrasena = () => {
   const [confirmarContrasena, setConfirmarContrasena] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
   
-  // Obtener el email del estado de navegación
-  const email = location.state?.email;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

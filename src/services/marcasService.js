@@ -18,6 +18,24 @@ class MarcasService {
     }
   }
 
+  // Buscar marcas por término
+  async buscarMarcas(termino) {
+    try {
+      const endpoint = API_ENDPOINTS.MARCAS.BUSCAR.replace(':termino', encodeURIComponent(termino));
+      const response = await fetch(buildApiUrl(endpoint), {
+        headers: DEFAULT_HEADERS,
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error al buscar marcas:', error);
+      throw error;
+    }
+  }
+
   // Crear nueva marca
   async crearMarca(marca) {
     try {
@@ -84,10 +102,21 @@ class MarcasService {
         headers: DEFAULT_HEADERS,
         credentials: 'include'
       });
+      // Parsear el cuerpo para obtener mensajes claros del backend
+      const raw = await response.text();
+      let data = null;
+      try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const msg =
+          (data && (data.message || data.mensaje)) ||
+          (response.status === 400 ? 'La marca está asociada a un producto.' : `Error ${response.status}: ${response.statusText}`);
+        const err = new Error(msg);
+        err.status = response.status;
+        err.body = data;
+        throw err;
       }
-      return await response.json();
+      // OK
+      return data ?? {};
     } catch (error) {
       console.error('Error al eliminar marca:', error);
       throw error;

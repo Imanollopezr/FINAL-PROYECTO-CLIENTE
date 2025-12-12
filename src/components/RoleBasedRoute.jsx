@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { getDefaultRouteByUser } from '../shared/utils/roleRouting';
 import PermisosService from '../services/permisosService';
+import { normalizeRoleName } from '../shared/utils/roleRouting';
 
 function RoleBasedRoute({ allowedRoles = [], requiredPermisos = [], redirectTo = '/login' }) {
   const { isAuthenticated, isLoading, user, permisos } = useAuth();
@@ -55,8 +56,8 @@ function RoleBasedRoute({ allowedRoles = [], requiredPermisos = [], redirectTo =
 
     // 403: sin permisos suficientes (roles)
     if (allowedRoles.length > 0) {
-      const userRole = user?.role || 'Usuario';
-      const hasPermission = allowedRoles.includes(userRole);
+      const userRole = normalizeRoleName(user?.role || 'Usuario');
+      const hasPermission = allowedRoles.map(normalizeRoleName).includes(userRole);
       if (!hasPermission) {
         // Si hay redirección configurada, no mostrar modal 403 (evita superponerse en la pantalla destino)
         if (!redirectTo) {
@@ -106,7 +107,7 @@ function RoleBasedRoute({ allowedRoles = [], requiredPermisos = [], redirectTo =
   // Si no se especifican roles, pero sí permisos, validar permisos
   if (allowedRoles.length === 0 && requiredPermisos.length > 0) {
     // Administrador: bypass de permisos explícitos
-    if ((user?.role || 'Usuario') === 'Administrador') {
+    if (normalizeRoleName(user?.role || 'Usuario') === 'Administrador') {
       return <Outlet />;
     }
     const missing = requiredPermisos.filter(p => !permisosList.includes(p));
@@ -118,8 +119,8 @@ function RoleBasedRoute({ allowedRoles = [], requiredPermisos = [], redirectTo =
   }
   
   // Verificar si el usuario tiene uno de los roles permitidos
-  const userRole = user?.role || 'Usuario';
-  const hasPermission = allowedRoles.includes(userRole);
+  const userRole = normalizeRoleName(user?.role || 'Usuario');
+  const hasPermission = allowedRoles.map(normalizeRoleName).includes(userRole);
   // Y verificar permisos si se requieren
   const missingPerms = requiredPermisos.filter(p => !permisosList.includes(p));
   

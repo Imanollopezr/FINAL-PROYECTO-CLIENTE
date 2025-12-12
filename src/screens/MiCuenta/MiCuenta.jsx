@@ -7,8 +7,8 @@ import usuariosService from '../../services/usuariosService';
 import { API_ENDPOINTS, buildApiUrl } from '../../constants/apiConstants';
 import { getToken as getStoreToken } from '../../features/auth/tokenStore';
 import { MdVisibility, MdVisibilityOff, MdLock, MdPerson, MdMail } from 'react-icons/md';
-import clientesService from '../../services/clientesService';
 import './MiCuenta.scss';
+import clientesService from '../../services/clientesService';
 
 const MiCuenta = () => {
   const { user, updateUser } = useAuth();
@@ -17,7 +17,8 @@ const MiCuenta = () => {
   const [claveActual, setClaveActual] = useState('');
   const [nuevaClave, setNuevaClave] = useState('');
   const [confirmarClave, setConfirmarClave] = useState('');
-  const [clienteForm, setClienteForm] = useState({ nombre: '', apellido: '', telefono: '', direccion: '', ciudad: '', documento: '', codigoPostal: '' });
+  const [misPedidos, setMisPedidos] = useState([]);
+  const [pedidosLoading, setPedidosLoading] = useState(true);
   
 
   const [showActual, setShowActual] = useState(false);
@@ -49,20 +50,6 @@ const MiCuenta = () => {
             const p = data.data;
             setPerfil({ nombre: p.nombre || p.Nombre || '', correo: p.correo || p.Correo || '', imagen: p.imagenUrl || p.ImagenUrl || p.imagen || p.Imagen || '' });
           }
-        try {
-          const me = await clientesService.obtenerMiCliente();
-          setClienteForm({
-            nombre: me?.nombre || '',
-            apellido: me?.apellido || '',
-            telefono: me?.telefono || '',
-            direccion: me?.direccion || '',
-            ciudad: me?.ciudad || '',
-            documento: me?.documento || '',
-            codigoPostal: me?.codigoPostal || ''
-          });
-        } catch (err) {
-          console.error('Error obteniendo cliente:', err);
-        }
         
       } catch (e) {
         console.error('Error cargando perfil:', e);
@@ -71,6 +58,30 @@ const MiCuenta = () => {
       }
     };
     cargarPerfil();
+  }, []);
+
+  useEffect(() => {
+    const cargarPedidos = async () => {
+      try {
+        const lista = await clientesService.obtenerMisPedidos();
+        if (Array.isArray(lista)) {
+          setMisPedidos(lista);
+        } else {
+          setMisPedidos([]);
+        }
+      } catch {
+        try {
+          const raw = localStorage.getItem('pedidosLocal') || '[]';
+          const parsed = JSON.parse(raw);
+          setMisPedidos(Array.isArray(parsed) ? parsed : []);
+        } catch {
+          setMisPedidos([]);
+        }
+      } finally {
+        setPedidosLoading(false);
+      }
+    };
+    cargarPedidos();
   }, []);
 
   const handleAvatarFileChange = async (e) => {
@@ -117,24 +128,6 @@ const MiCuenta = () => {
     updateUser({ image: '' });
   };
 
-  const handleGuardarCliente = async () => {
-    try {
-      const payload = {
-        Nombre: clienteForm.nombre,
-        Apellido: clienteForm.apellido,
-        Telefono: clienteForm.telefono,
-        Direccion: clienteForm.direccion,
-        Ciudad: clienteForm.ciudad,
-        Documento: clienteForm.documento,
-        CodigoPostal: clienteForm.codigoPostal
-      };
-      await clientesService.actualizarMiCliente(payload);
-      Swal.fire('Perfil actualizado', 'Tus datos se han guardado correctamente', 'success');
-    } catch (err) {
-      Swal.fire('Error', err.message || 'No se pudieron guardar tus datos', 'error');
-    }
-  };
-
   const handleCambiarClave = async (e) => {
     e.preventDefault();
     if (!nuevaClave || nuevaClave.length < 8) {
@@ -153,47 +146,6 @@ const MiCuenta = () => {
       setConfirmarClave('');
     } catch (err) {
       Swal.fire('Error', err.message || 'No se pudo cambiar la contraseña', 'error');
-    }
-  };
-
-  const verificarToken = async () => {
-    try {
-      const token = getStoreToken();
-      if (!token) {
-        Swal.fire('Token no encontrado', 'No hay token almacenado. Inicia sesión nuevamente.', 'warning');
-        return;
-      }
-
-      let payload = {};
-      try {
-        const base64 = token.split('.')[1];
-        const normalized = base64.replace(/-/g, '+').replace(/_/g, '/');
-        const json = atob(normalized);
-        payload = JSON.parse(json || '{}');
-      } catch {}
-
-      const exp = payload?.exp ? new Date(payload.exp * 1000) : null;
-      const rol = payload?.NombreRol || payload?.role || 'Desconocido';
-
-      const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
-      const resp = await fetch(buildApiUrl(API_ENDPOINTS.AUTH.PROFILE), { method: 'GET', headers, credentials: 'include' });
-      const ok = resp.ok;
-      const text = await resp.text();
-
-      let data = {};
-      try { data = text ? JSON.parse(text) : {}; } catch { data = {}; }
-
-      const mensaje = ok ? 'Token válido y perfil accesible' : (data?.mensaje || data?.Mensaje || 'Token inválido o expirado');
-
-      const detalles = [
-        exp ? `Expira: ${exp.toLocaleString()}` : 'Expira: desconocido',
-        `Rol: ${rol}`,
-        `Estado HTTP: ${resp.status}`
-      ].join('\n');
-
-      Swal.fire(ok ? 'Verificación exitosa' : 'Verificación fallida', `${mensaje}\n\n${detalles}`, ok ? 'success' : 'error');
-    } catch (err) {
-      Swal.fire('Error verificando token', err.message || 'Ocurrió un problema al verificar el token', 'error');
     }
   };
 
@@ -325,47 +277,47 @@ const MiCuenta = () => {
           </form>
         </div>
 
-        <div className="card profile-card">
-          <div className="card-title">Datos del Cliente</div>
-          <div className="cliente-body">
-            <div className="formulario-dos-columnas-base">
-              <div className="form-group">
-                <label>Nombre</label>
-                <input value={clienteForm.nombre} onChange={(e) => setClienteForm({ ...clienteForm, nombre: e.target.value })} placeholder="Tu nombre" />
+        
+        <div className="card">
+          <div className="card-title">Mis pedidos</div>
+          <div className="card-body">
+            {pedidosLoading ? (
+              <div className="skeleton-list">
+                <div className="skeleton-item" />
+                <div className="skeleton-item" />
+                <div className="skeleton-item" />
               </div>
-              <div className="form-group">
-                <label>Apellido</label>
-                <input value={clienteForm.apellido} onChange={(e) => setClienteForm({ ...clienteForm, apellido: e.target.value })} placeholder="Tu apellido" />
+            ) : misPedidos.length === 0 ? (
+              <div className="empty-state">
+                <span>No tienes pedidos registrados aún.</span>
               </div>
-              <div className="form-group">
-                <label>Teléfono</label>
-                <input value={clienteForm.telefono} onChange={(e) => setClienteForm({ ...clienteForm, telefono: e.target.value })} placeholder="Teléfono de contacto" />
+            ) : (
+              <div className="orders-list">
+                {misPedidos.slice(0, 10).map((p) => {
+                  const id = p.id || p.Id;
+                  const total = p.total || p.Total || 0;
+                  const estado = p.estado || p.Estado || 'Pendiente';
+                  const fecha = p.fechaCreacion || p.fechaPedido || p.FechaPedido || p.FechaCreacion;
+                  const items = p.items || p.detallesPedido || [];
+                  return (
+                    <div key={id || JSON.stringify(p)} className="order-item">
+                      <div className="order-main">
+                        <span className="order-id">#{id ?? '—'}</span>
+                        <span className={`order-status s-${String(estado).toLowerCase()}`}>{estado}</span>
+                      </div>
+                      <div className="order-meta">
+                        <span className="order-date">{fecha ? new Date(fecha).toLocaleString() : 'Sin fecha'}</span>
+                        <span className="order-total">${Number(total).toLocaleString()}</span>
+                        <span className="order-count">{Array.isArray(items) ? items.length : 0} ítems</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="form-group">
-                <label>Dirección</label>
-                <input value={clienteForm.direccion} onChange={(e) => setClienteForm({ ...clienteForm, direccion: e.target.value })} placeholder="Dirección" />
-              </div>
-              <div className="form-group">
-                <label>Ciudad</label>
-                <input value={clienteForm.ciudad} onChange={(e) => setClienteForm({ ...clienteForm, ciudad: e.target.value })} placeholder="Ciudad" />
-              </div>
-              <div className="form-group">
-                <label>Documento</label>
-                <input value={clienteForm.documento} onChange={(e) => setClienteForm({ ...clienteForm, documento: e.target.value })} placeholder="Documento" />
-              </div>
-              <div className="form-group">
-                <label>Código Postal</label>
-                <input value={clienteForm.codigoPostal} onChange={(e) => setClienteForm({ ...clienteForm, codigoPostal: e.target.value })} placeholder="Código Postal" />
-              </div>
-            </div>
-            <div className="actions" style={{ display: 'flex', gap: 8 }}>
-              <button type="button" className="btn btn-primary" onClick={handleGuardarCliente}>Guardar datos</button>
-              <button type="button" className="btn btn-secondary" onClick={verificarToken}>Verificar token</button>
-            </div>
+            )}
           </div>
         </div>
 
-        
       </div>
     </div>
   );

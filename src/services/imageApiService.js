@@ -76,7 +76,7 @@ class ImageApiService {
             return null;
           }
         },
-        searchImages: async (query = 'pets', count = 10, width = 800, height = 600) => {
+        searchImages: async (query = 'pets', count = 10) => {
           if (!this.unsplashAccessKey || this.unsplashAccessKey === 'tu-unsplash-access-key-aqui') {
             console.warn('Unsplash API key not configured, using pet image fallback');
             return await this.apis.pets.getPetImages(count);
@@ -242,14 +242,14 @@ class ImageApiService {
 
   // Método principal para obtener imágenes de diferentes fuentes
   async getImages(source = 'unsplash', options = {}) {
-    const { count = 10, category = null, width = 400, height = 300, query = 'pets' } = options;
+    const { count = 10, category = null, query = 'pets' } = options;
 
     switch (source) {
       case 'unsplash':
         if (category) {
-          return await this.apis.unsplash.searchImages(category, count, width, height);
+          return await this.apis.unsplash.searchImages(category, count);
         }
-        return await this.apis.unsplash.searchImages(query, count, width, height);
+        return await this.apis.unsplash.searchImages(query, count);
         
       case 'picsum':
         return await this.apis.picsum.getImageList(1, count);
@@ -277,7 +277,7 @@ class ImageApiService {
         }
       
       default:
-        return await this.apis.unsplash.searchImages(query, count, width, height);
+        return await this.apis.unsplash.searchImages(query, count);
     }
   }
 

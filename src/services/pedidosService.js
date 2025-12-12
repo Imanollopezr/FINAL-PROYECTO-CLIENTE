@@ -131,7 +131,15 @@ class PedidosService {
       const errorText = await response.text().catch(() => '');
       throw new Error(errorText || `Error ${response.status}`);
     }
-    return await response.json();
+    const confirmado = await response.json();
+    try {
+      const raw = localStorage.getItem('pedidosLocal') || '[]';
+      const list = JSON.parse(raw);
+      const idNum = Number(id);
+      const nuevaLista = (Array.isArray(list) ? list : []).filter(p => (Number(p.id || p.Id) !== idNum));
+      localStorage.setItem('pedidosLocal', JSON.stringify(nuevaLista));
+    } catch {}
+    return confirmado;
   }
 
   async obtenerHistorialEstados(id) {
@@ -203,6 +211,7 @@ class PedidosService {
         credentials: 'include',
         body: JSON.stringify(pedidoDto)
       });
+      let creado;
       if (!respMe.ok) {
         const errTxtMe = await respMe.text().catch(() => '');
         // Si el usuario tiene rol de administración, intentar endpoint general
@@ -216,9 +225,9 @@ class PedidosService {
           const errTxtAdmin = await respAdmin.text().catch(() => '');
           throw new Error(errTxtMe || errTxtAdmin || `Error ${respMe.status}`);
         }
-        var creado = await respAdmin.json();
+        creado = await respAdmin.json();
       } else {
-        var creado = await respMe.json();
+        creado = await respMe.json();
       }
       try {
         const raw = localStorage.getItem('pedidosLocal') || '[]';

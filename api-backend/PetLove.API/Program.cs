@@ -60,9 +60,10 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configurar Entity Framework con PostgreSQL, SQL Server o InMemory
+// Configurar Entity Framework con PostgreSQL, SQL Server, SQLite o InMemory
 var useInMemory = builder.Configuration.GetValue<bool>("UseInMemoryDb");
 var usePostgreSQL = builder.Configuration.GetValue<bool>("UsePostgreSQL");
+var useSQLite = builder.Configuration.GetValue<bool>("UseSQLite");
 
 var sqlServerConnection = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
@@ -70,6 +71,8 @@ var sqlServerConnection = builder.Configuration.GetConnectionString("DefaultConn
 var postgresConnection = builder.Configuration.GetConnectionString("PostgreSQLConnection")
     ?? Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSQLConnection")
     ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+var sqliteConnection = builder.Configuration.GetConnectionString("SQLiteConnection")
+    ?? $"Data Source={Path.Combine(builder.Environment.ContentRootPath, "petlove.db")}";
 
 if (useInMemory)
 {
@@ -94,6 +97,14 @@ else if (usePostgreSQL)
                     maxRetryDelay: TimeSpan.FromSeconds(30),
                     errorCodesToAdd: null);
             }));
+}
+else if (useSQLite)
+{
+    Console.WriteLine("🗂️ Usando SQLite para desarrollo local con persistencia de archivo");
+    builder.Services.AddDbContext<PetLoveDbContext>(options =>
+        options.UseSqlite(sqliteConnection, sqliteOptions => {
+            sqliteOptions.MigrationsAssembly("PetLove.API");
+        }));
 }
 else
 {

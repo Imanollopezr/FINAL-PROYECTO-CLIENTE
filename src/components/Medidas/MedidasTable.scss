@@ -420,21 +420,19 @@ body.dark-mode {
 }
 
 .detalles-contenido {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   margin: 0.5rem 0;
   
   @media (max-width: 768px) {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 0.75rem;
   }
   
   .columna-izquierda,
   .columna-derecha {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    display: contents;
   }
   
   .detalle-grupo {
@@ -453,8 +451,7 @@ body.dark-mode {
     align-items: center;
     justify-content: center;
     width: 100%;
-    max-width: 300px;
-    margin: 0 auto;
+    margin: 0;
     
     &::before {
       content: '';

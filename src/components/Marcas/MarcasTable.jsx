@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import marcasService from '../../services/marcasService';
 import AlertService from '../shared/AlertService';
@@ -32,7 +32,7 @@ const MarcasTable = () => {
   // (Eliminados)
 
   // Función para cargar marcas desde la API
-  const cargarMarcas = async () => {
+  const cargarMarcas = useCallback(async () => {
     try {
       setLoading(true);
       const data = await marcasService.obtenerMarcas();
@@ -48,10 +48,10 @@ const MarcasTable = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [marcasPorPagina, paginaActual]);
 
   // Función para buscar marcas
-  const buscarMarcas = async (termino) => {
+  const buscarMarcas = useCallback(async (termino) => {
     if (!termino.trim()) {
       cargarMarcas();
       return;
@@ -67,14 +67,14 @@ const MarcasTable = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [cargarMarcas]);
 
   // Efecto para búsqueda con debounce (evitar ejecución en el primer render)
   const firstSearchRef = useRef(true);
   useEffect(() => {
     if (firstSearchRef.current) {
       firstSearchRef.current = false;
-      return; // Evita doble carga inicial (StrictMode/efecto de montaje)
+      return;
     }
     const timeoutId = setTimeout(() => {
       if (busqueda.trim()) {
@@ -83,13 +83,12 @@ const MarcasTable = () => {
         cargarMarcas();
       }
     }, 500);
-
     return () => clearTimeout(timeoutId);
-  }, [busqueda]);
+  }, [busqueda, buscarMarcas, cargarMarcas]);
 
   useEffect(() => {
     cargarMarcas();
-  }, []);
+  }, [cargarMarcas]);
 
   const validarMarca = (marca) => {
     return marca.nombre?.trim() !== '';
@@ -148,27 +147,26 @@ const MarcasTable = () => {
     if (deletingId) return;
     const marca = marcas.find(m => m.idMarca === id);
     const marcaNombre = (marca?.nombre) || '';
-    const result = await AlertService.confirmDelete('¿Eliminar marca?', marcaNombre ? `Se eliminará la marca ${marcaNombre} (ID ${id}).` : 'Esta acción no se puede deshacer');
+    const result = await AlertService.confirmDelete('¿Eliminar marca?', marcaNombre ? `Se eliminará permanentemente la marca ${marcaNombre} (ID ${id}).` : 'Esta acción no se puede deshacer');
 
     if (result.isConfirmed) {
       try {
         setDeletingId(id);
+        setLoading(true);
         await marcasService.eliminarMarca(id);
-        AlertService.success('Marca eliminada', `La marca ${marcaNombre || ''} (ID ${id}) se eliminó correctamente.`);
-        setMarcas(prev => (prev || []).filter(m => (m.idMarca ?? m.id) !== id));
-        // Si la página queda vacía tras eliminar, retroceder una página
-        const indiceUltimaMarcaPost = paginaActual * marcasPorPagina;
-        const indicePrimeraMarcaPost = indiceUltimaMarcaPost - marcasPorPagina;
-        const marcasActualesPost = ((marcas || []).filter(m => (m.idMarca ?? m.id) !== id)).slice(indicePrimeraMarcaPost, indiceUltimaMarcaPost);
-        if (marcasActualesPost.length === 0 && paginaActual > 1) {
-          setPaginaActual(paginaActual - 1);
-        }
+        AlertService.success('Marca eliminada', `La marca ${marcaNombre || ''} (ID ${id}) fue eliminada.`);
+        await cargarMarcas();
       } catch (error) {
         console.error('Error al eliminar marca:', error);
-        const errorMessage = error.message || 'No se pudo eliminar la marca.';
-        AlertService.error('Error al eliminar', errorMessage);
+        const msg = (error?.message || '').toLowerCase();
+        const friendly =
+          error?.status === 400 || msg.includes('asociada') || msg.includes('producto')
+            ? 'No se puede eliminar: la marca está asociada a un producto.'
+            : (error?.message || 'No se pudo eliminar la marca.');
+        AlertService.error('Error al eliminar', friendly);
       } finally {
         setDeletingId(null);
+        setLoading(false);
       }
     }
   };
@@ -188,11 +186,7 @@ const MarcasTable = () => {
     }
   };
 
-  const limpiarFormulario = () => {
-    setNuevaMarca({ nombre: '', descripcion: '', activo: true });
-    setEditandoMarca(null);
-    setMostrarFormulario(false);
-  };
+  
 
   const verDetalles = (marca) => {
     setMarcaSeleccionada(marca);
@@ -212,9 +206,7 @@ const MarcasTable = () => {
     setPaginaActual(numeroPagina);
   };
 
-  const limpiarFiltros = () => {
-    // Función eliminada: no hay filtros de fecha
-  };
+  
 
   if (loading) {
     return <div className="loading">Cargando marcas...</div>;
@@ -319,51 +311,43 @@ const MarcasTable = () => {
       <Dialog.Root open={mostrarDetalles} onOpenChange={setMostrarDetalles}>
         <Dialog.Portal>
           <Dialog.Overlay className="dialog-overlay" />
-          <Dialog.Content className="dialog-content">
-            <Dialog.Title className="dialog-title">
-              Detalles de la Marca
+          <Dialog.Content className="dialog-content dialog-detalles">
+            <Dialog.Close asChild>
+              <button className="dialog-close-unified" aria-label="Cerrar">&times;</button>
+            </Dialog.Close>
+            <Dialog.Title className="modal-titulo-base">
+              {`Detalle de la Marca Nº ${String(marcaSeleccionada?.idMarca ?? '').padStart(7, '0')}`}
             </Dialog.Title>
             
             {marcaSeleccionada && (
-              <div className="detalles-marca-container">
-                <div className="seccion-detalles">
-                  <h3 className="titulo-seccion">Información General</h3>
-                  <div className="detalles-contenido">
-                    <div className="columna-izquierda">
-                      <div className="detalle-grupo">
-                        <label>Nombre:</label>
-                        <span>{marcaSeleccionada.nombre}</span>
-                      </div>
-                      <div className="detalle-grupo">
-                        <label>Descripción:</label>
-                        <span>{marcaSeleccionada.descripcion || 'No especificada'}</span>
-                      </div>
+              <>
+                <div className="seccion-detalles-base">
+                  <h3 className="titulo-seccion-base">Información General</h3>
+                  <div className="formulario-dos-columnas-base">
+                    <div className="detalle-grupo-base">
+                      <label>Nombre</label>
+                      <span>{marcaSeleccionada.nombre}</span>
                     </div>
-                    <div className="columna-derecha">
-                      <div className="detalle-grupo">
-                        <label>Estado:</label>
-                        <span className={`estado-badge ${marcaSeleccionada.activo ? 'activo' : 'inactivo'}`}>
-                          {marcaSeleccionada.activo ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </div>
-                      <div className="detalle-grupo">
-                        <label>Fecha de Registro:</label>
-                        <span>{new Date(marcaSeleccionada.fechaRegistro).toLocaleDateString()}</span>
-                      </div>
+                    <div className="detalle-grupo-base">
+                      <label>Estado</label>
+                      <span className={`estado-badge ${marcaSeleccionada.activo ? 'activo' : 'inactivo'}`}>
+                        {marcaSeleccionada.activo ? 'Activa' : 'Inactiva'}
+                      </span>
+                    </div>
+                    <div className="detalle-grupo-base">
+                      <label>Descripción</label>
+                      <span>{marcaSeleccionada.descripcion || 'No especificada'}</span>
+                    </div>
+                    <div className="detalle-grupo-base">
+                      <label>Fecha de Registro</label>
+                      <span>{marcaSeleccionada.fechaRegistro ? new Date(marcaSeleccionada.fechaRegistro).toLocaleString() : '—'}</span>
                     </div>
                   </div>
                 </div>
-              </div>
+              </>
             )}
 
-            <div className="botones-formulario">
-              <button 
-                type="button" 
-                onClick={() => setMostrarDetalles(false)}
-                className="btn-cancelar"
-              >
-                Cerrar
-              </button>
+            <div className="modal-acciones-base">
             </div>
           </Dialog.Content>
         </Dialog.Portal>

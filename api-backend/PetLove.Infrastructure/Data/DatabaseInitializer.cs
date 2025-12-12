@@ -33,10 +33,20 @@ namespace PetLove.Infrastructure.Data
                 }
 
                 // Check if database exists and is accessible
-                var canConnect = await _context.Database.CanConnectAsync();
-                if (!canConnect)
+                bool canConnect = true;
+                try
                 {
-                    _logger.LogError("Cannot connect to database. Please check connection string.");
+                    canConnect = await _context.Database.CanConnectAsync();
+                }
+                catch (Exception ex)
+                {
+                    // InMemory provider may throw or return false; continue for non-relational providers
+                    _logger.LogWarning(ex, "CanConnectAsync failed; continuing initialization for non-relational providers.");
+                    canConnect = !_context.Database.IsRelational();
+                }
+                if (!canConnect && _context.Database.IsRelational())
+                {
+                    _logger.LogError("Cannot connect to relational database. Please check connection string.");
                     return;
                 }
 
@@ -223,6 +233,61 @@ namespace PetLove.Infrastructure.Data
                 _logger.LogWarning(ex, "No se pudieron asegurar los permisos mínimos por rol.");
             }
 
+            // Seed USUARIOS administrativos por defecto si no existen
+            try
+            {
+                var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.NombreRol == "Administrador" && r.Activo);
+                var asistenteRole = await _context.Roles.FirstOrDefaultAsync(r => r.NombreRol == "Asistente" && r.Activo);
+                var now = DateTime.UtcNow;
+
+                if (adminRole != null)
+                {
+                    var adminEmail = "admin@petlove.com";
+                    var existsAdmin = await _context.Usuarios.AnyAsync(u => u.Correo.ToLower() == adminEmail);
+                    if (!existsAdmin)
+                    {
+                        // Clave en texto plano; AuthController migrará a BCrypt al primer login si coincide
+                        _context.Usuarios.Add(new Usuario
+                        {
+                            Nombres = "Admin",
+                            Apellidos = "Principal",
+                            Correo = adminEmail,
+                            Clave = "admin123",
+                            IdRol = adminRole.Id,
+                            Activo = true,
+                            FechaRegistro = now
+                        });
+                        _logger.LogInformation("Usuario administrador por defecto creado: {Email}", adminEmail);
+                    }
+                }
+
+                if (asistenteRole != null)
+                {
+                    var asistenteEmail = "asistente@petlove.com";
+                    var existsAsistente = await _context.Usuarios.AnyAsync(u => u.Correo.ToLower() == asistenteEmail);
+                    if (!existsAsistente)
+                    {
+                        _context.Usuarios.Add(new Usuario
+                        {
+                            Nombres = "Asistente",
+                            Apellidos = "Sistema",
+                            Correo = asistenteEmail,
+                            Clave = "asistente123",
+                            IdRol = asistenteRole.Id,
+                            Activo = true,
+                            FechaRegistro = now
+                        });
+                        _logger.LogInformation("Usuario asistente por defecto creado: {Email}", asistenteEmail);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "No se pudieron crear usuarios administrativos por defecto.");
+            }
+
             // Check if data already exists
             var categoriaExists = await _context.Categorias.AnyAsync();
             
@@ -354,7 +419,6 @@ namespace PetLove.Infrastructure.Data
                         _logger.LogInformation("Se creó la talla 'No aplica' con ID=1");
                     }
 
-                    // COLOR puede no existir en bases antiguas; intentar crear registro si la tabla existe
                     try
                     {
                         var colorNoAplica = await _context.Colores.AsNoTracking().FirstOrDefaultAsync(c => c.IdColor == 1);
@@ -368,6 +432,42 @@ namespace PetLove.Infrastructure.Data
                     catch (Exception ex)
                     {
                         _logger.LogWarning(ex, "No fue posible asegurar el color 'No aplica'. Verifique migraciones de la tabla COLOR.");
+                    }
+                }
+                else
+                {
+                    var tallaNoAplica = await _context.Tallas.AsNoTracking().FirstOrDefaultAsync(t => t.IdTalla == 1);
+                    if (tallaNoAplica == null)
+                    {
+                        var talla = new Talla
+                        {
+                            IdTalla = 1,
+                            Nombre = "No aplica",
+                            Abreviatura = null,
+                            Descripcion = "Valor por defecto",
+                            Activo = true,
+                            FechaRegistro = DateTime.Now
+                        };
+                        await _context.Tallas.AddAsync(talla);
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation("Se creó la talla 'No aplica' con ID=1 (no SQL Server).");
+                    }
+
+                    var colorNoAplica = await _context.Colores.AsNoTracking().FirstOrDefaultAsync(c => c.IdColor == 1);
+                    if (colorNoAplica == null)
+                    {
+                        var color = new Color
+                        {
+                            IdColor = 1,
+                            Nombre = "No aplica",
+                            Codigo = null,
+                            Descripcion = "Valor por defecto",
+                            Activo = true,
+                            FechaRegistro = DateTime.Now
+                        };
+                        await _context.Colores.AddAsync(color);
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation("Se creó el color 'No aplica' con ID=1 (no SQL Server).");
                     }
                 }
             }
