@@ -236,23 +236,32 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
           apellidoDefault = parts.slice(1).join(' ');
         }
       }
-      const docDefault = '';
-      const telDefault = isAdminUser ? '' : (user?.telefono ?? user?.Telefono ?? '');
-      const dirDefault = isAdminUser ? '' : (user?.direccion ?? user?.Direccion ?? '');
-      const ciudadDefault = isAdminUser ? '' : (user?.ciudad ?? user?.Ciudad ?? '');
+      // Prefiere datos del perfil de cliente si existen
+      let me = null;
+      try { me = await clientesService.obtenerMiCliente(); } catch {}
+      const profileDoc = String(me?.Documento ?? me?.documento ?? user?.documento ?? user?.Documento ?? '').replace(/\D/g, '');
+      const lockDoc = !!profileDoc;
+      const docDefault = lockDoc ? profileDoc : '';
+      let telDefault = isAdminUser ? '' : (me?.telefono ?? me?.Telefono ?? user?.telefono ?? user?.Telefono ?? '');
+      let dirDefault = isAdminUser ? '' : (me?.direccion ?? me?.Direccion ?? user?.direccion ?? user?.Direccion ?? '');
+      let ciudadDefault = isAdminUser ? '' : (me?.ciudad ?? me?.Ciudad ?? user?.ciudad ?? user?.Ciudad ?? '');
+      if (me) {
+        nombreDefault = me?.nombres ?? me?.nombre ?? nombreDefault;
+        apellidoDefault = me?.apellidos ?? apellidoDefault;
+      }
       const formHtml = `
         <div class="checkout-form">
           <div class="form-row">
             <label>Documento</label>
-            <input id="doc" type="tel" placeholder="Documento (máx. 10 dígitos)" value="${docDefault}" maxlength="10" inputmode="numeric" />
+            <input id="doc" type="tel" placeholder="Documento (máx. 10 dígitos)" value="${docDefault}" maxlength="10" inputmode="numeric" ${lockDoc ? 'readonly' : ''} />
           </div>
           <div class="form-row">
             <label>Nombre</label>
-            <input id="nombre" type="text" placeholder="Nombre" value="${nombreDefault}" readonly />
+            <input id="nombre" type="text" placeholder="Nombre" value="${nombreDefault}" />
           </div>
           <div class="form-row">
             <label>Apellidos</label>
-            <input id="apellido" type="text" placeholder="Apellidos" value="${apellidoDefault}" readonly />
+            <input id="apellido" type="text" placeholder="Apellidos" value="${apellidoDefault}" />
           </div>
           <div class="form-row">
             <label>Teléfono</label>
@@ -280,8 +289,7 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
           const telInput = document.getElementById('tel');
           const nombreInput = document.getElementById('nombre');
           const apellidoInput = document.getElementById('apellido');
-          if (nombreInput) nombreInput.readOnly = true;
-          if (apellidoInput) apellidoInput.readOnly = true;
+          
 
           const enforceDigitsMax10 = (el) => {
             const v = (el?.value || '').replace(/\D/g, '').slice(0, 10);
@@ -295,8 +303,6 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
           const lookupClientePorDocumento = async () => {
             const docNum = (docInput?.value || '').replace(/\D/g, '').slice(0, 10);
             if (!docNum) {
-              if (nombreInput) nombreInput.readOnly = false;
-              if (apellidoInput) apellidoInput.readOnly = false;
               return;
             }
             try {
@@ -307,24 +313,22 @@ const CarritoCompras = ({ isOpen, onClose, carrito, setCarrito }) => {
               if (exact) {
                 if (nombreInput) {
                   nombreInput.value = exact.nombres || exact.nombre || '';
-                  nombreInput.readOnly = true;
                 }
                 if (apellidoInput) {
                   apellidoInput.value = exact.apellidos || exact.apellido || exact.lastName || '';
-                  apellidoInput.readOnly = true;
                 }
               } else {
-                if (nombreInput) nombreInput.readOnly = false;
-                if (apellidoInput) apellidoInput.readOnly = false;
+                // mantener nombre/apellido editables
               }
             } catch {
-              if (nombreInput) nombreInput.readOnly = false;
-              if (apellidoInput) apellidoInput.readOnly = false;
+              // mantener nombre/apellido editables
             }
           };
 
           docInput?.addEventListener('input', () => {
             enforceDigitsMax10(docInput);
+            // Consulta opcional para autocompletar nombre/apellido sin bloquear
+            // lookupClientePorDocumento();
           });
           telInput?.addEventListener('input', () => {
             enforceDigitsMax10(telInput);
