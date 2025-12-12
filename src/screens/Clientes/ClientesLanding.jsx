@@ -136,16 +136,8 @@ const ClientesLanding = () => {
               <span>¿Dónde comprar?</span>
               <div className="nav-indicator"></div>
             </a>
-            <a href="#nosotros" onClick={(e) => { e.preventDefault(); scrollToSection('nosotros'); }}>
-              <span>Nosotros</span>
-              <div className="nav-indicator"></div>
-            </a>
             <a href="#productos" onClick={(e) => { e.preventDefault(); navegarAProductos(); }}>
               <span>Productos</span>
-              <div className="nav-indicator"></div>
-            </a>
-            <a href="#comunidad">
-              <span>Comunidad</span>
               <div className="nav-indicator"></div>
             </a>
             <a href="/blog" onClick={(e) => { e.preventDefault(); navigate('/blog'); }}>

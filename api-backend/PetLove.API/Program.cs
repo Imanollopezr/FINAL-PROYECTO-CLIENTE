@@ -18,11 +18,6 @@ if (!string.IsNullOrWhiteSpace(portEnv))
     builder.WebHost.UseUrls($"http://0.0.0.0:{portEnv}");
     Console.WriteLine($"Kestrel bound to 0.0.0.0:{portEnv}");
 }
-else
-{
-    builder.WebHost.UseUrls("http://localhost:8095");
-    Console.WriteLine("Kestrel bound to http://localhost:8095 (Development)");
-}
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -268,14 +263,10 @@ app.UseSwaggerUI();
 app.UseCors("AllowReactApp");
 
 // Configurar archivos estáticos para servir imágenes
-var uploadsRoot = Path.Combine(app.Environment.ContentRootPath, "uploads");
-if (!Directory.Exists(uploadsRoot))
-{
-    Directory.CreateDirectory(uploadsRoot);
-}
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsRoot),
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+        Path.Combine(app.Environment.ContentRootPath, "uploads")),
     RequestPath = "/uploads"
 });
 

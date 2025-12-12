@@ -121,38 +121,6 @@ body {
   }
 }
 
-/* Responsive global */
-@media (max-width: 992px) {
-  .page-content {
-    padding: 12px;
-  }
-}
-
-@media (max-width: 768px) {
-  .form-group-inline {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .form-group-inline label {
-    min-width: auto;
-    margin-right: 0;
-    margin-bottom: 0.5rem;
-  }
-  .btn {
-    width: 100%;
-  }
-  .page-content table {
-    display: block;
-    width: 100%;
-    overflow-x: auto;
-    border-spacing: 0;
-  }
-  .page-content th,
-  .page-content td {
-    white-space: nowrap;
-  }
-}
-
 /* Estilos para formularios */
 .form-group {
   margin-bottom: 0.6rem;

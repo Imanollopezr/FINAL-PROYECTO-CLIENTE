@@ -18,13 +18,22 @@ const BaseLayout = () => {
 
   return (
     <main className={`page-wrapper ${roleClass}`}>
-      <Sidebar />
+      {/* Sidebar */}
+      <aside
+        className={`bg-white dark:bg-gray-950 shadow-xl border-r border-gray-200 dark:border-gray-800 fixed h-full z-20 w-64`}
+      >
+        <Sidebar />
+      </aside>
 
-      <div className={`content-wrapper`}>
+      {/* Contenido */}
+      <div className={`content-wrapper`}
+      >
+        {/* Navbar fijo */}
         <header className="sticky top-0 z-30">
           <Navbar onLogout={handleLogout} />
         </header>
 
+        {/* Pantallas dinámicas */}
         <div className="page-content">
           <Outlet />
         </div>

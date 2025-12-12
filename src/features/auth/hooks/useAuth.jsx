@@ -83,9 +83,13 @@ export const AuthProvider = ({ children }) => {
             const userRole = normalizeRoleName(userInfo.nombreRol || userInfo.rol || 'Usuario')
             setUser({
               id: userInfo.id.toString(),
+<<<<<<< HEAD
               name: `${userInfo.nombres || ''} ${userInfo.apellidos || ''}`.trim() || 'Usuario',
               nombres: userInfo.nombres || '',
               apellidos: userInfo.apellidos || '',
+=======
+              name: userInfo.nombres || 'Usuario',
+>>>>>>> cae8761d79b4d480c1f6fc02510dfa83552650f0
               email: userInfo.correo,
               role: userRole,
               rolId: userInfo.idRol || userInfo.IdRol,
@@ -152,8 +156,11 @@ export const AuthProvider = ({ children }) => {
           const user = {
             id: userInfo.id.toString(),
             name: `${userInfo.nombres} ${userInfo.apellidos}`.trim(),
+<<<<<<< HEAD
             nombres: userInfo.nombres || '',
             apellidos: userInfo.apellidos || '',
+=======
+>>>>>>> cae8761d79b4d480c1f6fc02510dfa83552650f0
             email: userInfo.correo,
             role: userRole,
             image: userInfo.imagenUrl || userInfo.ImagenUrl || userInfo.imagen || userInfo.Imagen || null
@@ -211,8 +218,11 @@ export const AuthProvider = ({ children }) => {
               const user = {
                 id: userInfo.id.toString(),
                 name: `${userInfo.nombres} ${userInfo.apellidos}`.trim(),
+<<<<<<< HEAD
                 nombres: userInfo.nombres || '',
                 apellidos: userInfo.apellidos || '',
+=======
+>>>>>>> cae8761d79b4d480c1f6fc02510dfa83552650f0
                 email: userInfo.correo,
                 role: userRole,
                 image: userInfo.imagenUrl || userInfo.ImagenUrl || userInfo.imagen || userInfo.Imagen || null
