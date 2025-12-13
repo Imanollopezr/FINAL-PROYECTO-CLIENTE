@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaUser } from 'react-icons/fa';
+import { FaUser, FaPaw, FaFacebookF, FaInstagram, FaTwitter } from 'react-icons/fa';
 import './ClientesLanding.scss';
 import imageApiService from '../../services/imageApiService';
 
@@ -59,12 +59,11 @@ const BlogList = () => {
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <span className="logo-icon">🐾</span>
+            <span className="logo-icon"><FaPaw size={22} /></span>
             <span className="logo-text">Pet Love</span>
             <div className="logo-glow"></div>
           </div>
           <nav className="nav-menu">
-            {/* Orden: Inicio, ¿Dónde comprar?, Nosotros, Productos, Comunidad, Blog. Ocultamos el actual (Blog). */}
             <a href="/" onClick={(e) => { e.preventDefault(); if (!isActive('/')) navigate('/'); }}>
               <span>Inicio</span>
               <div className="nav-indicator"></div>
@@ -73,24 +72,18 @@ const BlogList = () => {
               <span>¿Dónde comprar?</span>
               <div className="nav-indicator"></div>
             </a>
-            <a href="/" onClick={(e) => { e.preventDefault(); if (!isActive('/')) navigate('/'); }}>
-              <span>Nosotros</span>
-              <div className="nav-indicator"></div>
-            </a>
             <a href="/productos-tienda" onClick={(e) => { e.preventDefault(); if (!isActive('/productos-tienda')) navigate('/productos-tienda'); }}>
               <span>Productos</span>
               <div className="nav-indicator"></div>
             </a>
-            <a href="/" onClick={(e) => { e.preventDefault(); if (!isActive('/')) navigate('/'); }}>
-              <span>Comunidad</span>
-              <div className="nav-indicator"></div>
-            </a>
-            {/* Blog oculto */}
           </nav>
           <div className="header-actions">
-            <button className="icon-button" onClick={() => navigate('/login')} aria-label="Cuenta">
-              <FaUser size={18} />
+            <button className="btn-primary btn-hero" onClick={() => navigate('/login')}>
+              Iniciar sesión
             </button>
+            <span className="icon-static" aria-hidden="true">
+              <FaUser size={18} />
+            </span>
           </div>
         </div>
       </header>
@@ -125,8 +118,22 @@ const BlogList = () => {
             </div>
             <aside className="blog-sidebar">
               <div className="blog-about">
-                <h3>Sobre nosotros</h3>
-                <p>Este es un espacio creado para compartir contigo todo lo que necesitas saber acerca de tu mascota: información curiosa, su cuidado y las mejores opciones para consentir a este miembro tan importante de tu familia.</p>
+                <div className="about-header">
+                  <span className="about-icon">🐾</span>
+                  <h3>Sobre Pet Love</h3>
+                </div>
+                <p>Contenido curado por amantes de las mascotas.</p>
+                <ul className="about-highlights">
+                  <li>Consejos prácticos</li>
+                  <li>Guías de cuidado</li>
+                  <li>Productos recomendados</li>
+                </ul>
+                <button
+                  className="about-cta"
+                  onClick={() => navigate('/blog/quienes-somos')}
+                >
+                  Conócenos
+                </button>
               </div>
               <div className="blog-categories">
                 <h4>Categorías</h4>
@@ -151,48 +158,53 @@ const BlogList = () => {
           </div>
         </div>
       </section>
-      <footer id="contacto" className="footer">
-        <div className="footer-content">
-          <div className="footer-section">
+      <footer id="contacto" className="footer footer-alt">
+        <div className="footer-wave"></div>
+        <div className="footer-wrap">
+          <div className="brand-block">
             <div className="footer-logo">
               <span className="logo-icon">🐾</span>
               <span className="logo-text">Pet Love</span>
             </div>
             <p>Tu tienda de confianza para el cuidado de mascotas</p>
-            <div className="social-links">
-              <a href="#" className="social-link">FB</a>
-              <a href="#" className="social-link">IG</a>
-              <a href="#" className="social-link">TW</a>
+            <div className="social-row">
+              <a href="#" className="social-circle"><FaFacebookF /></a>
+              <a href="#" className="social-circle"><FaInstagram /></a>
+              <a href="#" className="social-circle"><FaTwitter /></a>
             </div>
           </div>
-          <div className="footer-section">
-            <h4>Contacto</h4>
-            <div className="contact-info">
-              <p>Dirección: Calle Principal 123, Ciudad</p>
-              <p>Teléfono: +57 300 123 4567</p>
-              <p>Email: info@petlove.com</p>
-            </div>
+          <div className="newsletter-block">
+            <h4>Únete a la manada</h4>
+            <p>Recibe ofertas exclusivas y novedades</p>
+            <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
+              <input type="email" placeholder="Tu correo" />
+              <button className="btn-newsletter">Suscribirme</button>
+            </form>
           </div>
-          <div className="footer-section">
-            <h4>Horarios</h4>
-            <div className="schedule">
-              <p>Lunes - Viernes: 9:00 - 18:00</p>
-              <p>Sábados: 9:00 - 16:00</p>
-              <p>Domingos: 10:00 - 14:00</p>
+          <div className="links-block">
+            <div className="link-group">
+              <h5>Compañía</h5>
+              <a href="#">Nosotros</a>
+              <a href="#">Blog</a>
+              <a href="#">Comunidad</a>
             </div>
-          </div>
-          <div className="footer-section">
-            <h4>Enlaces</h4>
-            <div className="footer-links">
-              <a href="#">Política de Privacidad</a>
-              <a href="#">Términos y Condiciones</a>
-              <a href="#">Preguntas Frecuentes</a>
+            <div className="link-group">
+              <h5>Ayuda</h5>
               <a href="#">Soporte</a>
+              <a href="#">Preguntas frecuentes</a>
+              <a href="#">¿Dónde comprar?</a>
+            </div>
+            <div className="link-group">
+              <h5>Legal</h5>
+              <a href="#">Privacidad</a>
+              <a href="#">Términos</a>
+              <a href="#">Cookies</a>
             </div>
           </div>
         </div>
-        <div className="footer-bottom">
-          <p>&copy; 2024 Pet Love. Todos los derechos reservados.</p>
+        <div className="footer-bar">
+          <span>&copy; 2024 Pet Love</span>
+          <span>Hecho con 🐾</span>
         </div>
       </footer>
     </div>

@@ -83,13 +83,9 @@ export const AuthProvider = ({ children }) => {
             const userRole = normalizeRoleName(userInfo.nombreRol || userInfo.rol || 'Usuario')
             setUser({
               id: userInfo.id.toString(),
-<<<<<<< HEAD
               name: `${userInfo.nombres || ''} ${userInfo.apellidos || ''}`.trim() || 'Usuario',
               nombres: userInfo.nombres || '',
               apellidos: userInfo.apellidos || '',
-=======
-              name: userInfo.nombres || 'Usuario',
->>>>>>> cae8761d79b4d480c1f6fc02510dfa83552650f0
               email: userInfo.correo,
               role: userRole,
               rolId: userInfo.idRol || userInfo.IdRol,
@@ -153,18 +149,15 @@ export const AuthProvider = ({ children }) => {
           
           console.log('🎯 DEBUG - Rol final asignado:', userRole);
           
-          const user = {
-            id: userInfo.id.toString(),
-            name: `${userInfo.nombres} ${userInfo.apellidos}`.trim(),
-<<<<<<< HEAD
-            nombres: userInfo.nombres || '',
-            apellidos: userInfo.apellidos || '',
-=======
->>>>>>> cae8761d79b4d480c1f6fc02510dfa83552650f0
-            email: userInfo.correo,
-            role: userRole,
-            image: userInfo.imagenUrl || userInfo.ImagenUrl || userInfo.imagen || userInfo.Imagen || null
-          }
+           const user = {
+             id: userInfo.id.toString(),
+             name: `${userInfo.nombres} ${userInfo.apellidos}`.trim(),
+             nombres: userInfo.nombres || '',
+             apellidos: userInfo.apellidos || '',
+             email: userInfo.correo,
+             role: userRole,
+             image: userInfo.imagenUrl || userInfo.ImagenUrl || userInfo.imagen || userInfo.Imagen || null
+           }
           
           // Debug: Verificar el usuario final
           console.log('👤 DEBUG - Usuario final creado:', user);
@@ -215,18 +208,15 @@ export const AuthProvider = ({ children }) => {
               const userData = responseData.data
               const userInfo = userData.usuario
               const userRole = userInfo.nombreRol || 'Usuario'
-              const user = {
-                id: userInfo.id.toString(),
-                name: `${userInfo.nombres} ${userInfo.apellidos}`.trim(),
-<<<<<<< HEAD
-                nombres: userInfo.nombres || '',
-                apellidos: userInfo.apellidos || '',
-=======
->>>>>>> cae8761d79b4d480c1f6fc02510dfa83552650f0
-                email: userInfo.correo,
-                role: userRole,
-                image: userInfo.imagenUrl || userInfo.ImagenUrl || userInfo.imagen || userInfo.Imagen || null
-              }
+               const user = {
+                 id: userInfo.id.toString(),
+                 name: `${userInfo.nombres} ${userInfo.apellidos}`.trim(),
+                 nombres: userInfo.nombres || '',
+                 apellidos: userInfo.apellidos || '',
+                 email: userInfo.correo,
+                 role: userRole,
+                 image: userInfo.imagenUrl || userInfo.ImagenUrl || userInfo.imagen || userInfo.Imagen || null
+               }
               setUser({ ...user, rolId: userInfo.idRol || userInfo.IdRol })
               setToken(userData.token)
               setStoreToken(userData.token)

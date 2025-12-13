@@ -167,7 +167,10 @@ const Sidebar = () => {
                     const isActive = location.pathname === conf.path || (conf.path.includes('?') && location.pathname === conf.path.split('?')[0]);
                     return (
                       <div key={`item-${key}`} className="menu-item">
-                        <Link to={conf.path} className={`menu-link ${isActive ? 'active' : ''}`}>
+                        <Link
+                          to={conf.path}
+                          className={`menu-link ${isActive ? 'active' : ''}`}
+                        >
                           <span className="menu-link-icon"><Icon size={20} /></span>
                           <span className="menu-link-text">{conf.label}</span>
                         </Link>

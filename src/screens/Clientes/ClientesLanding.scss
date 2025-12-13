@@ -43,17 +43,118 @@
   background: #fff;
   box-shadow: 0 8px 24px rgba(0,0,0,0.04);
 }
+.pet-love-landing.minimal .blog-card.blog-card-detail {
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  padding: 18px;
+  border: 1px solid #ffe08a;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.pet-love-landing.minimal .blog-card.blog-card-detail:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.10);
+  border-color: #fbbf24;
+}
 .pet-love-landing.minimal .blog-thumb img {
   width: 100%;
   aspect-ratio: 4/3;
   object-fit: cover;
   border-radius: 12px;
 }
+.pet-love-landing.minimal .blog-card.blog-card-detail .blog-thumb { position: relative; }
+.pet-love-landing.minimal .blog-card.blog-card-detail .brand-badge {
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fff7e6;
+  border: 1px solid #ffe08a;
+  box-shadow: 0 8px 20px rgba(255,193,7,0.18);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pet-love-landing.minimal .blog-card.blog-card-detail .brand-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
 .pet-love-landing.minimal .blog-title { font-weight: 700; color: #1f2937; }
 .pet-love-landing.minimal .blog-meta { color: #6b7280; font-size: 0.9rem; display: flex; gap: 8px; }
-.pet-love-landing.minimal .blog-excerpt { color: #374151; }
+.pet-love-landing.minimal .blog-excerpt { color: #4b5563; }
+.pet-love-landing.minimal .blog-card.blog-card-detail .blog-excerpt { color: #6b7280; line-height: 1.7; }
 .pet-love-landing.minimal .btn-leer-mas { background: #f59e0b; color: #1f2937; border: none; border-radius: 999px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
 .pet-love-landing.minimal .blog-sidebar { border-left: 1px solid #e5e7eb; padding-left: 16px; }
+
+.pet-love-landing.minimal .blog-sidebar .blog-about {
+  background: #ffffff;
+  border: 1px solid #ffe08a;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+  margin-bottom: 16px;
+}
+.pet-love-landing.minimal .blog-sidebar .blog-about .about-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.pet-love-landing.minimal .blog-sidebar .blog-about .about-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff7e6;
+  border: 1px solid #ffe08a;
+  color: #1f2937;
+}
+.pet-love-landing.minimal .blog-sidebar .blog-about p { 
+  color: #6b7280; 
+  margin-bottom: 12px; 
+}
+.pet-love-landing.minimal .blog-sidebar .blog-about .about-highlights {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: grid;
+  gap: 8px;
+}
+.pet-love-landing.minimal .blog-sidebar .blog-about .about-highlights li {
+  position: relative;
+  padding-left: 18px;
+  color: #374151;
+}
+.pet-love-landing.minimal .blog-sidebar .blog-about .about-highlights li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #22c55e;
+  font-weight: 700;
+}
+.pet-love-landing.minimal .blog-sidebar .blog-about .about-cta {
+  background: #f59e0b;
+  color: #1f2937;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.pet-love-landing.minimal .blog-sidebar .blog-about .about-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(245,158,11,0.25);
+}
 .pet-love-landing.minimal .blog-about h3 { margin: 0 0 8px; }
 .pet-love-landing.minimal .blog-categories h4 { margin-top: 24px; }
 .pet-love-landing.minimal .blog-categories ul { list-style: none; padding: 0; margin: 8px 0 0; }
@@ -3698,18 +3799,18 @@
 
 /* Banda de categorías - variante minimal */
 .pet-love-landing.minimal .categorias-banda { background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%); padding: 20px 0; border-top: 1px solid #f1f3f4; border-bottom: 1px solid #f1f3f4; }
-.pet-love-landing.minimal .categorias-container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+.pet-love-landing.minimal .categorias-container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; }
 .pet-love-landing.minimal .categoria-chip { 
   display: flex; 
   align-items: center; 
-  gap: 12px; 
+  gap: 14px; 
   background: #ffffff;
   border: 1px solid #e5e7eb; 
-  border-radius: 16px; 
-  padding: 12px 16px; 
+  border-radius: 18px; 
+  padding: 14px 18px; 
   cursor: pointer; 
   transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease; 
-  box-shadow: 0 6px 16px rgba(0,0,0,0.05); 
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06); 
   position: relative;
   overflow: hidden;
 }
@@ -3734,34 +3835,230 @@
   width: 8px; 
 }
 .pet-love-landing.minimal .chip-icon { 
-  font-size: 1.35rem; 
+  font-size: 1.5rem; 
   transition: transform 0.25s ease, filter 0.25s ease, border-color 0.25s ease; 
   display: inline-flex; 
   align-items: center; 
   justify-content: center; 
-  width: 32px; 
-  height: 32px; 
+  width: 40px; 
+  height: 40px; 
   border-radius: 50%; 
   background: radial-gradient(circle, #fff7e6 0%, #ffffff 60%); 
   border: 1px solid #ffe08a; 
   box-shadow: 0 8px 18px rgba(255, 143, 0, 0.12);
 }
 .pet-love-landing.minimal .chip-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   color: #ff8f00;
   transition: transform 0.25s ease;
 }
 .pet-love-landing.minimal .categoria-chip:hover .chip-icon { transform: translateY(-1px) scale(1.05); border-color: #ffc107; }
 .pet-love-landing.minimal .categoria-chip:hover .chip-icon svg { transform: translateX(2px) rotate(-6deg); }
-.pet-love-landing.minimal .chip-text { font-weight: 800; color: #1f2937; letter-spacing: 0.01em; }
-.pet-love-landing.minimal .chip-text::after { content: '›'; margin-left: 6px; opacity: 0; transform: translateX(-4px); transition: opacity 0.25s ease, transform 0.25s ease; color: #ff8f00; }
+.pet-love-landing.minimal .chip-text { font-weight: 800; color: #1f2937; letter-spacing: 0.01em; font-size: 1.05rem; }
+.pet-love-landing.minimal .chip-text::after { content: '›'; margin-left: 8px; opacity: 0; transform: translateX(-4px); transition: opacity 0.25s ease, transform 0.25s ease; color: #ff8f00; font-size: 1.1rem; }
 .pet-love-landing.minimal .categoria-chip:hover .chip-text::after { opacity: 1; transform: translateX(0); }
 .pet-love-landing.minimal .categoria-chip.cat-accesorios { }
 .pet-love-landing.minimal .categoria-chip.cat-alimento-para-perros, 
 .pet-love-landing.minimal .categoria-chip.cat-alimento-para-gatos { }
 .pet-love-landing.minimal .categoria-chip.cat-higiene { }
 .pet-love-landing.minimal .categoria-chip.cat-juguetes { }
-@media (max-width: 1024px) { .pet-love-landing.minimal .categorias-container { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 768px) { .pet-love-landing.minimal .categorias-container { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .pet-love-landing.minimal .categorias-container { grid-template-columns: 1fr; } }
+ @media (max-width: 1024px) { .pet-love-landing.minimal .categorias-container { grid-template-columns: repeat(3, 1fr); } }
+ @media (max-width: 768px) { .pet-love-landing.minimal .categorias-container { grid-template-columns: repeat(2, 1fr); } }
+ @media (max-width: 480px) { .pet-love-landing.minimal .categorias-container { grid-template-columns: 1fr; } }
+/* Estilos extra para mejorar la sección Nosotros */
+.nosotros-section .nosotros-text h2 {
+  font-size: clamp(2rem, 2vw + 0.8rem, 2.6rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+  position: relative;
+}
+.nosotros-section .nosotros-text h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 70px;
+  height: 4px;
+  background: linear-gradient(90deg, #ffc107, #ff8f00);
+  border-radius: 2px;
+}
+.nosotros-section .nosotros-features .feature {
+  background: linear-gradient(135deg, #fff7e6, #ffffff);
+  border: 1px solid #ffe08a;
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 10px 30px rgba(255, 193, 7, 0.12);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.nosotros-section .nosotros-features .feature:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(255, 193, 7, 0.18);
+  border-color: #ffc107;
+}
+.nosotros-section .nosotros-features .feature .feature-icon {
+  font-size: 1.15rem;
+  margin-top: 0.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff7e6 0%, #ffffff 60%);
+  border: 1px solid #ffe08a;
+  box-shadow: 0 8px 18px rgba(255, 143, 0, 0.12);
+  color: #ff8f00;
+}
+.nosotros-section .nosotros-features .feature .feature-content h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+.nosotros-section .nosotros-visual .nosotros-card {
+  border: 1px solid #ffe08a;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff7e6 0%, #ffffff 60%);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+}
+.nosotros-section .nosotros-visual .nosotros-card::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -20%;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 193, 7, 0.18) 0%, transparent 70%);
+  filter: blur(6px);
+}
+.nosotros-section .nosotros-visual .card-header h3 {
+  font-weight: 800;
+  position: relative;
+  font-size: 1.35rem;
+  color: #1f2937;
+}
+.nosotros-section .nosotros-visual .card-header h3::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #ffc107, #ff8f00);
+  border-radius: 2px;
+}
+.nosotros-section .nosotros-visual .card-content p {
+  color: #374151;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin: 12px 0 16px;
+}
+.nosotros-section .nosotros-visual .mission-stats .stat-icon {
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff7e6 0%, #ffffff 60%);
+  border: 1px solid #ffe08a;
+  box-shadow: 0 6px 14px rgba(255, 143, 0, 0.12);
+  color: #ff8f00;
+}
+.nosotros-section .nosotros-visual .mission-stats .stat-text {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* Estilos adicionales para la sección del blog */
+.pet-love-landing.minimal .blog-card {
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 18px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.pet-love-landing.minimal .blog-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+  border-color: #ffe08a;
+}
+.pet-love-landing.minimal .blog-thumb {
+  position: relative;
+}
+.pet-love-landing.minimal .blog-thumb img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 14px;
+  display: block;
+}
+.pet-love-landing.minimal .blog-thumb .blog-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #fff7e6;
+  color: #1f2937;
+  border: 1px solid #ffe08a;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+.pet-love-landing.minimal .blog-title {
+  font-weight: 800;
+  color: #1f2937;
+  margin: 0 0 6px;
+  position: relative;
+}
+.pet-love-landing.minimal .blog-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #ffc107, #ff8f00);
+  border-radius: 2px;
+}
+.pet-love-landing.minimal .blog-meta {
+  color: #6b7280;
+  font-size: 0.9rem;
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.pet-love-landing.minimal .blog-excerpt {
+  color: #374151;
+  margin-top: 8px;
+}
+.pet-love-landing.minimal .btn-leer-mas {
+  background: #f59e0b;
+  color: #1f2937;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pet-love-landing.minimal .btn-leer-mas:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.35);
+}

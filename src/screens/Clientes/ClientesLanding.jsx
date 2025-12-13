@@ -4,7 +4,9 @@ import categoriasService from '../../services/categoriasService';
 import { FaUser, FaPaw, FaFacebookF, FaInstagram, FaTwitter, FaDog, FaCat, FaBone, FaSoap, FaRibbon, FaPuzzlePiece } from 'react-icons/fa';
 import './ClientesLanding.scss';
 import perroPng from '../../assets/images/perro.png';
-import pexelsService from '../../services/pexelsService';
+import mascotasImage from '../../assets/images/mascotas.png';
+import mascotasLoginImage from '../../assets/images/Mascotaslogin2.png';
+import petincioImage from '../../assets/images/petincio.png';
 
 const ClientesLanding = () => {
   const navigate = useNavigate();
@@ -252,6 +254,167 @@ const ClientesLanding = () => {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      <section className="destacados-section" id="destacados">
+        <div className="destacados-container">
+          <div className="section-header">
+            <h2>Inspiración para tu mascota</h2>
+            <p>Ideas y contenido para el bienestar y la diversión</p>
+          </div>
+          <div className="destacados-grid">
+            <div className="destacado-card">
+              <div className="card-media">
+                <img
+                  src="https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=1200&auto=format&fit=crop"
+                  alt="Perros jugando con juguetes"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = mascotasLoginImage; }}
+                />
+              </div>
+              <div className="card-body">
+                <h3>Juguetes irresistibles</h3>
+                <p>Diversión asegurada con materiales seguros y duraderos.</p>
+                <button className="btn-outline" onClick={() => navigate('/productos-tienda')}>Ver más</button>
+              </div>
+            </div>
+            <div className="destacado-card">
+              <div className="card-media">
+                <img
+                  src="https://images.unsplash.com/photo-1589924691995-400dc9ecc119?q=80&w=1200&h=800&auto=format&fit=crop"
+                  alt="Alimento para mascotas en plato"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = mascotasImage; }}
+                />
+              </div>
+              <div className="card-body">
+                <h3>Alimento premium</h3>
+                <p>Nutrición balanceada para cada etapa de vida.</p>
+                <button className="btn-outline" onClick={() => navigate('/productos-tienda')}>Ver más</button>
+              </div>
+            </div>
+            <div className="destacado-card">
+              <div className="card-media">
+                <img
+                  src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1200&h=800&auto=format&fit=crop"
+                  alt="Baño y cuidado de mascotas"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = petincioImage; }}
+                />
+              </div>
+              <div className="card-body">
+                <h3>Cuidado e higiene</h3>
+                <p>Productos pensados para su bienestar diario.</p>
+                <button className="btn-outline" onClick={() => navigate('/productos-tienda')}>Ver más</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="nosotros-section" id="nosotros">
+        <div className="nosotros-content">
+          <div className="nosotros-text">
+            <h2>Amor por las mascotas</h2>
+            <p className="nosotros-intro">
+              Ofrecemos productos y contenido para mejorar la vida de tus compañeros peludos.
+            </p>
+            <div className="nosotros-features">
+              <div className="feature">
+                <span className="feature-icon"><FaRibbon /></span>
+                <div className="feature-content">
+                  <h4>Calidad certificada</h4>
+                  <p>Selección de marcas reconocidas y materiales seguros.</p>
+                </div>
+              </div>
+              <div className="feature">
+                <span className="feature-icon"><FaBone /></span>
+                <div className="feature-content">
+                  <h4>Nutrición responsable</h4>
+                  <p>Alimentos pensados para su salud y energía diaria.</p>
+                </div>
+              </div>
+              <div className="feature">
+                <span className="feature-icon"><FaPaw /></span>
+                <div className="feature-content">
+                  <h4>Comunidad activa</h4>
+                  <p>Consejos, guías y experiencias para el cuidado integral.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="nosotros-visual">
+            <div className="nosotros-card">
+              <div className="card-header">
+                <h3>Nuestra misión</h3>
+              </div>
+              <div className="card-content">
+                <p>
+                  Inspirar una relación más feliz y saludable entre humanos y mascotas mediante buenos hábitos y productos confiables.
+                </p>
+                <div className="mission-stats">
+                  <div className="mission-stat">
+                    <span className="stat-icon"><FaDog /></span>
+                    <span className="stat-text">+500 productos para perros</span>
+                  </div>
+                  <div className="mission-stat">
+                    <span className="stat-icon"><FaCat /></span>
+                    <span className="stat-text">+300 opciones para gatos</span>
+                  </div>
+                  <div className="mission-stat">
+                    <span className="stat-icon"><FaPuzzlePiece /></span>
+                    <span className="stat-text">Guías y tips semanales</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="blog-section" id="blog-destacados">
+        <div className="blog-container">
+          <div className="blog-header">
+            <h2>Desde el blog</h2>
+            <p>Consejos y novedades para el cuidado de tus mascotas</p>
+          </div>
+          <div className="blog-grid">
+            <article className="blog-card">
+              <div className="blog-thumb">
+                <span className="blog-badge">Guías</span>
+                <img
+                  src="https://images.unsplash.com/photo-1516379092867-177c3c5c7e66?q=80&w=1200&auto=format&fit=crop"
+                  alt="Rutinas de paseo"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = heroImage; }}
+                />
+              </div>
+              <div>
+                <h3 className="blog-title">Rutinas de paseo saludables</h3>
+                <div className="blog-meta">
+                  <span>Guías</span>
+                  <span>5 min</span>
+                </div>
+                <p className="blog-excerpt">Ideas para hacer del paseo un momento seguro y divertido.</p>
+                <button className="btn-leer-mas" onClick={() => navigate('/blog')}>Leer más</button>
+              </div>
+            </article>
+            <aside className="blog-sidebar">
+              <div className="blog-about">
+                <h3>Sobre Pet Love</h3>
+                <p>Contenido curado por amantes de las mascotas.</p>
+              </div>
+              <div className="blog-categories">
+                <h4>Categorías</h4>
+                <ul>
+                  {(categorias || []).slice(0, 6).map((c) => (
+                    <li key={c.id}>{String(c.nombre || '').trim()}</li>
+                  ))}
+                </ul>
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
 

@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FaUser, FaFacebookF, FaInstagram, FaTwitter } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import CarritoCompras from '../../components/Carrito/CarritoCompras';
-import { useAuth } from '../../features/auth/hooks/useAuth';
 import productosService from '../../services/productosService';
 import imageApiService from '../../services/imageApiService';
 import Swal from 'sweetalert2';
@@ -18,7 +17,7 @@ import logoImg from '../../assets/images/Huella_Petlove.png';
 const ProductosLanding = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, user, logout, permisos } = useAuth();
+  // Sesión no usada en header; se muestra botón de iniciar sesión siempre
   const [busqueda, setBusqueda] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('Todos');
   const [filtroPrecio, setFiltroPrecio] = useState('Todos');
@@ -148,38 +147,7 @@ const ProductosLanding = () => {
     { value: '200000+', label: 'Más de $200.000' }
   ];
 
-  const cerrarSesion = async () => {
-    await logout();
-    navigate('/');
-  };
-
-  const volverAModulos = () => {
-    try {
-      const role = (user?.role || '').trim();
-      const perms = Array.isArray(permisos) ? permisos : [];
-      if (perms.includes('VerDashboard') && (role === 'Administrador' || role === 'Asistente')) {
-        navigate('/dashboard');
-        return;
-      }
-      const mapping = [
-        ['GestionUsuarios','/usuarios'],
-        ['GestionProductos','/productos'],
-        ['GestionCategorias','/categorias'],
-        ['GestionMarcas','/marcas'],
-        ['GestionMedidas','/medidas'],
-        ['GestionProveedores','/proveedores'],
-        ['GestionClientes','/clientes'],
-        ['GestionCompras','/compras'],
-        ['GestionPedidos','/pedidos'],
-        ['GestionRoles','/roles'],
-        ['GestionVentas','/ventas'],
-      ];
-      const target = mapping.find(([perm]) => perms.includes(perm))?.[1];
-      navigate(target || '/mi-cuenta');
-    } catch {
-      navigate('/mi-cuenta');
-    }
-  };
+  const navegarALogin = () => navigate('/login');
 
   const agregarAlCarrito = async (producto) => {
     // Verificar estado y stock
@@ -459,7 +427,7 @@ const ProductosLanding = () => {
             <div className="logo-glow"></div>
           </div>
           <nav className="nav-menu">
-            {/* Orden: Inicio, ¿Dónde comprar?, Nosotros, Productos, Comunidad, Blog. Ocultamos el actual (Productos). */}
+            {/* Orden: Inicio, ¿Dónde comprar?, Productos, Blog. Ocultamos el actual (Productos). */}
             <a href="/" onClick={(e) => { e.preventDefault(); const path = '/'; if (location.pathname !== path) navigate(path); }}>
               <span>Inicio</span>
               <div className="nav-indicator"></div>
@@ -468,33 +436,18 @@ const ProductosLanding = () => {
               <span>¿Dónde comprar?</span>
               <div className="nav-indicator"></div>
             </a>
-            <a href="/" onClick={(e) => { e.preventDefault(); const path = '/'; if (location.pathname !== path) navigate(path); }}>
-              <span>Nosotros</span>
-              <div className="nav-indicator"></div>
-            </a>
             <a href="/blog" onClick={(e) => { e.preventDefault(); const path = '/blog'; if (!location.pathname.startsWith(path)) navigate(path); }}>
               <span>Blog</span>
               <div className="nav-indicator"></div>
             </a>
           </nav>
           <div className="header-actions">
-            <button
-              className="icon-button decorativo"
-              aria-label="Cuenta"
-              title="Cuenta"
-            >
-              <FaUser size={18} />
+            <button className="btn-primary btn-hero" onClick={navegarALogin}>
+              Iniciar sesión
             </button>
-            {isAuthenticated && (
-              <button className="btn-outline volver-modulos-btn" onClick={volverAModulos} title="Volver a Módulos">
-                Volver a Módulos
-              </button>
-            )}
-            {isAuthenticated && (
-              <button className="btn-secondary cerrar-sesion-btn" onClick={cerrarSesion} title="Cerrar sesión">
-                Cerrar sesión
-              </button>
-            )}
+            <span className="icon-static" aria-hidden="true">
+              <FaUser size={18} />
+            </span>
             <button 
               className="carrito-toggle"
               onClick={() => setCarritoAbierto(!carritoAbierto)}

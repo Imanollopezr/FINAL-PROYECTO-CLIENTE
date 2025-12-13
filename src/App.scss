@@ -1443,3 +1443,53 @@ body.dark-mode .tabla-ventas tbody tr:hover {
     }
   }
 }
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(255, 193, 7, 0.08) 0%, rgba(255, 143, 0, 0.06) 40%, rgba(17, 24, 39, 0.02) 100%);
+  z-index: 1000;
+}
+
+.loading-content {
+  text-align: center;
+  color: var(--xl-text-color);
+  max-width: 520px;
+  padding: 1rem;
+}
+
+.loading-spinner {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  border: 4px solid rgba(17, 24, 39, 0.12);
+  border-top-color: #ff8f00;
+  animation: pl_spin 1s linear infinite;
+  position: relative;
+}
+
+.loading-spinner .paw-print {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  animation: pl_bounce 1.2s ease-in-out infinite;
+}
+
+@keyframes pl_spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pl_bounce {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -60%) scale(1.15); }
+}

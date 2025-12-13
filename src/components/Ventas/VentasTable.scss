@@ -631,6 +631,50 @@ body.dark-mode {
   }
 }
 
+/* Botón claro para estado con apariencia de botón real */
+.btn-estado {
+  display: inline-block;
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  user-select: none;
+}
+.btn-estado:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.btn-estado.activa {
+  background-color: #22c55e;
+  color: #ffffff;
+}
+.btn-estado.activa:hover:not(:disabled) {
+  background-color: #16a34a;
+  transform: translateY(-1px);
+}
+.btn-estado.anulada {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+.btn-estado.anulada:hover:not(:disabled) {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+}
+.btn-estado.pendiente {
+  background-color: #fca5a5;
+  color: #7f1d1d;
+  border-color: #f87171;
+}
+.btn-estado.pendiente:hover:not(:disabled) {
+  background-color: #f87171;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
 // Estilos para botones de acción
 .acciones-tabla {
   display: flex;

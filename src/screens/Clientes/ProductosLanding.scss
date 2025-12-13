@@ -244,6 +244,34 @@ body {
         }
       }
 
+      & .btn-primary.btn-hero {
+        background: linear-gradient(135deg, #111827, #374151);
+        color: #ffffff;
+        box-shadow: 0 14px 36px rgba(17, 24, 39, 0.18);
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 800;
+      }
+      & .btn-primary.btn-hero:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 42px rgba(17, 24, 39, 0.28);
+      }
+      & .icon-static {
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 1px solid rgba(0,0,0,0.08);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+        color: #111827;
+        pointer-events: none;
+        user-select: none;
+      }
+
       .btn-secondary {
         background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
         color: white;

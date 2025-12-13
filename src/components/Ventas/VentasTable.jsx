@@ -264,10 +264,14 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
             }
           }
         }
-        const pedidosFormateados = (Array.isArray(pedidos) ? pedidos : []).map(p => ({
+        const pedidosFormateados = (Array.isArray(pedidos) ? pedidos : []).map(p => {
+          const nombre = p.cliente?.nombres || p.cliente?.nombre || p.cliente?.Nombre || '';
+          const apellidos = p.cliente?.apellidos || p.cliente?.apellido || p.cliente?.Apellidos || '';
+          const nombreCompleto = `${String(nombre || '').trim()} ${String(apellidos || '').trim()}`.trim() || 'Cliente';
+          return {
           id: p.id || p.Id,
           fecha: p.fechaPedido ? new Date(p.fechaPedido).toISOString().split('T')[0] : (p.fechaCreacion ? new Date(p.fechaCreacion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]),
-          usuario: p.cliente?.nombres || p.cliente?.nombre || p.cliente?.Nombre || 'Cliente',
+          usuario: nombreCompleto,
           total: p.total ?? p.Total ?? ((p.Subtotal || 0) + (p.Impuestos || 0) + (p.CostoEnvio || 0)),
           estado: p.estado || p.Estado || p.estadoPedido || p.EstadoPedido || 'Pendiente',
           productos: (p.detallesPedido || p.DetallesPedido || []).map(dp => ({
@@ -276,7 +280,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
             cantidad: dp.cantidad || dp.Cantidad,
             precio: dp.precioUnitario || dp.PrecioUnitario
           }))
-        }));
+        }});
         setVentas(pedidosFormateados);
       } else {
         let url = buildApiUrl(API_ENDPOINTS.VENTAS.GET_ALL);
@@ -306,10 +310,14 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
           throw new Error(`Error ${response.status}: ${txt || response.statusText}`);
         }
         const ventasData = await response.json();
-        const ventasFormateadas = (Array.isArray(ventasData) ? ventasData : []).map(venta => ({
+        const ventasFormateadas = (Array.isArray(ventasData) ? ventasData : []).map(venta => {
+          const nombre = venta.cliente?.nombres || venta.cliente?.nombre || '';
+          const apellidos = venta.cliente?.apellidos || venta.cliente?.apellido || '';
+          const nombreCompleto = `${String(nombre || '').trim()} ${String(apellidos || '').trim()}`.trim() || 'Usuario';
+          return {
           id: venta.id,
           fecha: venta.fechaVenta ? new Date(venta.fechaVenta).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-          usuario: venta.cliente?.nombres || venta.cliente?.nombre || 'Usuario',
+          usuario: nombreCompleto,
           total: venta.total || 0,
           estado: venta.estado || 'activa',
           productos: (venta.detallesVenta || []).map(detalle => ({
@@ -321,7 +329,7 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
             talla: detalle.producto?.talla || null,
             medida: detalle.producto?.medida || null
           }))
-        }));
+        }});
         setVentas(ventasFormateadas);
       }
       
@@ -1518,32 +1526,31 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                       <td>
                         {String(filterByEstado || '').toLowerCase() === 'pendiente' ? (
                           esAdmin ? (
-                            <span
-                              className="estado-badge inactivo"
+                            <button
+                              className="btn-estado pendiente"
                               title="Habilitar venta"
                               onClick={() => confirmarPedido(v.id)}
-                              style={{ cursor: 'pointer' }}
+                              disabled={loading}
                             >
                               Pendiente
-                            </span>
+                            </button>
                           ) : (
                             <span
-                              className="estado-badge inactivo"
+                              className="btn-estado pendiente"
                               title="Pedido en proceso"
-                              style={{ cursor: 'default' }}
                             >
                               En Proceso
                             </span>
                           )
                         ) : (
-                          <span
-                            className={`estado-badge ${String(v.estado || '').toLowerCase() === 'anulada' ? 'inactivo' : 'activo'}`}
+                          <button
+                            className={`btn-estado ${String(v.estado || '').toLowerCase() === 'anulada' ? 'anulada' : 'activa'}`}
                             onClick={() => esAdmin && handleClickEstado(v)}
                             title={esAdmin ? (String(v.estado || '').toLowerCase() === 'anulada' ? 'Reactivar venta' : 'Cambiar estado') : ''}
-                            style={{ cursor: esAdmin ? 'pointer' : 'default' }}
+                            disabled={!esAdmin}
                           >
                             {normalizarEstado(v.estado)}
-                          </span>
+                          </button>
                         )}
                       </td>
                       <td>
@@ -1585,14 +1592,14 @@ const VentasTable = ({ filterByEstado = null, title = null }) => {
                                     </div>
                                     <div className="detalle-grupo-base">
                                       <label>Estado:</label>
-                                      <span
-                                        className={`estado-badge ${String(v.estado || '').toLowerCase() === 'anulada' ? 'inactivo' : 'activo'}`}
+                                      <button
+                                        className={`btn-estado ${String(v.estado || '').toLowerCase() === 'anulada' ? 'anulada' : 'activa'}`}
                                         onClick={() => esAdmin && handleClickEstado(v)}
                                         title={esAdmin ? (String(v.estado || '').toLowerCase() === 'anulada' ? 'Reactivar venta' : 'Cambiar estado') : ''}
-                                        style={{ cursor: esAdmin ? 'pointer' : 'default' }}
+                                        disabled={!esAdmin}
                                       >
                                         {normalizarEstado(v.estado)}
-                                      </span>
+                                      </button>
                                     </div>
                                     <div className="detalle-grupo-base">
                                       <label>Total:</label>
