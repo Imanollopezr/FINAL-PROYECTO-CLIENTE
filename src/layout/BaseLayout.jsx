@@ -2,7 +2,6 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { Sidebar } from "../components";
 import Navbar from "../components/Navbar/Navbar"; // ✅ Ruta corregida
 import { useAuth } from "../features/auth/hooks/useAuth";
-import { } from "react";
 import { getRoleThemeClass } from "../shared/utils/roleRouting";
 import "./Layout.css";
 

@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaUser, FaPaw, FaFacebookF, FaInstagram, FaTwitter } from 'react-icons/fa';
 import './ClientesLanding.scss';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { getDefaultRouteByRole } from '../../shared/utils/roleRouting';
 
 const LeafletMap = ({ address }) => {
   const mapRef = useRef(null);
@@ -80,6 +82,7 @@ const LeafletMap = ({ address }) => {
 const DondeComprar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
   const isActive = (path) => {
     if (path === '/blog') return location.pathname.startsWith('/blog');
     return location.pathname === path;
@@ -91,6 +94,14 @@ const DondeComprar = () => {
   const openExternal = () => window.open(direccionUrl, '_blank');
   const doSearch = () => setMapQuery(encodeURIComponent(searchAddress));
   const resetSearch = () => { setSearchAddress(direccion); setMapQuery(encodeURIComponent(direccion)); };
+  const goToModules = () => {
+    const route = getDefaultRouteByRole(user?.role || 'Visitante');
+    navigate(route);
+  };
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <div className="pet-love-landing minimal">
@@ -118,9 +129,20 @@ const DondeComprar = () => {
             </a>
           </nav>
           <div className="header-actions">
-            <button className="btn-primary btn-hero" onClick={() => navigate('/login')}>
-              Iniciar sesión
-            </button>
+            {isAuthenticated && user?.role === 'Administrador' ? (
+              <>
+                <button className="btn-primary btn-hero" onClick={goToModules}>
+                  Ir a mis módulos
+                </button>
+                <button className="btn-secondary btn-hero" onClick={handleLogout}>
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <button className="btn-primary btn-hero" onClick={() => navigate('/login')}>
+                Iniciar sesión
+              </button>
+            )}
             <span className="icon-static" aria-hidden="true">
               <FaUser size={18} />
             </span>

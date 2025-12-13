@@ -122,6 +122,7 @@ const Sidebar = () => {
 
   // Configuración de ítems y módulos
   const itemsConfig = {
+    dashboard: { path: '/dashboard', label: 'Dashboard', icon: MdOutlineGridView },
     inicio: { path: '/', label: 'Inicio', icon: MdOutlineGridView },
     catalogo: { path: '/productos-tienda', label: 'Catálogo', icon: MdOutlineShoppingBag },
     carrito: { path: '/productos-tienda?carrito=open', label: 'Mi carrito', icon: MdOutlineShoppingCart },
@@ -143,7 +144,7 @@ const Sidebar = () => {
   };
 
   const modules = [
-    { title: 'Acceso', items: ['roles', 'usuarios'] },
+    { title: 'Acceso', items: ['dashboard', 'roles', 'usuarios'] },
     { title: 'Gestión', items: ['clientes', 'proveedores'] },
     { title: 'Operaciones', items: ['compras', 'pedidos', 'ventas'] },
     { title: 'Catálogo', items: ['productos', 'categorias', 'marcas', 'medidas', 'tallas', 'colores'] },

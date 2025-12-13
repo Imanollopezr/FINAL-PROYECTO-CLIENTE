@@ -10,6 +10,8 @@ import Swal from 'sweetalert2';
 import OptimizedImage from '../../components/common/OptimizedImage';
 import { API_BASE_URL } from '../../constants/apiConstants';
 import { formatPriceCL } from '../../Utils/priceUtils';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { getDefaultRouteByRole } from '../../shared/utils/roleRouting';
 import './ProductosLanding.scss';
 import './ClientesLanding-animations.scss';
 import logoImg from '../../assets/images/Huella_Petlove.png';
@@ -17,7 +19,7 @@ import logoImg from '../../assets/images/Huella_Petlove.png';
 const ProductosLanding = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  // Sesión no usada en header; se muestra botón de iniciar sesión siempre
+  const { isAuthenticated, user, logout } = useAuth();
   const [busqueda, setBusqueda] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('Todos');
   const [filtroPrecio, setFiltroPrecio] = useState('Todos');
@@ -442,9 +444,26 @@ const ProductosLanding = () => {
             </a>
           </nav>
           <div className="header-actions">
-            <button className="btn-primary btn-hero" onClick={navegarALogin}>
-              Iniciar sesión
-            </button>
+            {isAuthenticated ? (
+              <>
+                <button
+                  className="btn-primary btn-hero volver-modulos-btn"
+                  onClick={() => navigate(getDefaultRouteByRole(user?.role))}
+                >
+                  Mis módulos
+                </button>
+                <button
+                  className="btn-outline btn-hero"
+                  onClick={async () => { await logout(); navigate('/'); }}
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <button className="btn-primary btn-hero" onClick={navegarALogin}>
+                Iniciar sesión
+              </button>
+            )}
             <span className="icon-static" aria-hidden="true">
               <FaUser size={18} />
             </span>

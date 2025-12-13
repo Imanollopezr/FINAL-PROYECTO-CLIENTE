@@ -7,10 +7,13 @@ import perroPng from '../../assets/images/perro.png';
 import mascotasImage from '../../assets/images/mascotas.png';
 import mascotasLoginImage from '../../assets/images/Mascotaslogin2.png';
 import petincioImage from '../../assets/images/petincio.png';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { getDefaultRouteByRole } from '../../shared/utils/roleRouting';
 
 const ClientesLanding = () => {
   const navigate = useNavigate();
   const isLoading = false;
+  const { isAuthenticated, user, logout } = useAuth();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [categorias, setCategorias] = useState([]);
   const [heroImage, setHeroImage] = useState(perroPng);
@@ -149,9 +152,26 @@ const ClientesLanding = () => {
           </nav>
 
           <div className="header-actions">
-            <button className="btn-primary btn-hero" onClick={navegarALogin}>
-              Iniciar sesión
-            </button>
+            {isAuthenticated ? (
+              <>
+                <button
+                  className="btn-primary btn-hero volver-modulos-btn"
+                  onClick={() => navigate(getDefaultRouteByRole(user?.role))}
+                >
+                  Mis módulos
+                </button>
+                <button
+                  className="btn-outline btn-hero"
+                  onClick={async () => { await logout(); navigate('/'); }}
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <button className="btn-primary btn-hero" onClick={navegarALogin}>
+                Iniciar sesión
+              </button>
+            )}
             <span className="icon-static" aria-hidden="true">
               <FaUser size={18} />
             </span>

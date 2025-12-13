@@ -1,5 +1,4 @@
 import React, { useContext } from "react";
-import { useLocation } from "react-router-dom";
 import "./Navbar.scss";
 import logo from "../../assets/images/Huella_Petlove.png";
 import { useAuth } from "../../features/auth/hooks/useAuth";
@@ -8,7 +7,6 @@ import { SidebarContext } from "../../context/SidebarContext";
 
 const Navbar = ({ onLogout }) => {
   const { user } = useAuth();
-  const location = useLocation();
   const avatarInitial = useMemo(() => {
     const src = user?.name || user?.email || "Usuario";
     const s = String(src).trim();

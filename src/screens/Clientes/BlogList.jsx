@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FaUser, FaPaw, FaFacebookF, FaInstagram, FaTwitter } from 'react-icons/fa';
 import './ClientesLanding.scss';
 import imageApiService from '../../services/imageApiService';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { getDefaultRouteByRole } from '../../shared/utils/roleRouting';
 
 const posts = [
   {
@@ -37,6 +39,7 @@ const posts = [
 const BlogList = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated, user, logout } = useAuth();
   const [apiImages, setApiImages] = useState([]);
   const isActive = (path) => {
     if (path === '/blog') return location.pathname.startsWith('/blog');
@@ -78,9 +81,26 @@ const BlogList = () => {
             </a>
           </nav>
           <div className="header-actions">
-            <button className="btn-primary btn-hero" onClick={() => navigate('/login')}>
-              Iniciar sesión
-            </button>
+            {isAuthenticated ? (
+              <>
+                <button
+                  className="btn-primary btn-hero volver-modulos-btn"
+                  onClick={() => navigate(getDefaultRouteByRole(user?.role))}
+                >
+                  Mis módulos
+                </button>
+                <button
+                  className="btn-outline btn-hero"
+                  onClick={async () => { await logout(); navigate('/'); }}
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <button className="btn-primary btn-hero" onClick={() => navigate('/login')}>
+                Iniciar sesión
+              </button>
+            )}
             <span className="icon-static" aria-hidden="true">
               <FaUser size={18} />
             </span>
